@@ -66,7 +66,7 @@ function Index() {
       {next && (
         <TopBar
           mosqueName={mosqueName}
-          mosqueAddress={settings?.mosque_address ?? `Zon ${data.zone}`}
+          mosqueAddress={`Zon ${data.zone}`}
           nextKey={next.key}
           nextAt={next.at}
         />
