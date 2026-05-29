@@ -46,6 +46,17 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-emerald: var(--emerald);
+  --color-emerald-soft: var(--emerald-soft);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --font-arabic: "Amiri", "Scheherazade New", serif;
+  --font-display: "Plus Jakarta Sans", "Inter", sans-serif;
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -63,25 +74,40 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  /* Mosque TV — deep navy with gold + emerald Islamic accents */
+  --background: oklch(0.18 0.04 250);
+  --foreground: oklch(0.97 0.01 90);
+  --card: oklch(0.22 0.045 250);
+  --card-foreground: oklch(0.97 0.01 90);
+  --popover: oklch(0.22 0.045 250);
+  --popover-foreground: oklch(0.97 0.01 90);
+  --primary: oklch(0.82 0.14 85); /* gold */
+  --primary-foreground: oklch(0.2 0.04 250);
+  --secondary: oklch(0.55 0.13 160); /* emerald */
+  --secondary-foreground: oklch(0.97 0.01 90);
+  --muted: oklch(0.26 0.04 250);
+  --muted-foreground: oklch(0.78 0.02 90);
+  --accent: oklch(0.6 0.14 160);
+  --accent-foreground: oklch(0.15 0.03 250);
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(0.98 0.01 90);
+  --border: oklch(0.32 0.04 250);
+  --input: oklch(0.3 0.04 250);
+  --ring: oklch(0.82 0.14 85);
+  /* custom tokens */
+  --gold: oklch(0.82 0.14 85);
+  --gold-soft: oklch(0.72 0.11 85);
+  --emerald: oklch(0.55 0.13 160);
+  --emerald-soft: oklch(0.45 0.1 160);
+  --surface-1: oklch(0.22 0.045 250);
+  --surface-2: oklch(0.26 0.05 250);
+  --surface-3: oklch(0.3 0.05 250);
+  --danger: oklch(0.65 0.22 25);
+  --warning: oklch(0.78 0.17 60);
+  --gradient-gold: linear-gradient(135deg, oklch(0.85 0.14 85), oklch(0.7 0.12 70));
+  --gradient-surface: linear-gradient(160deg, oklch(0.24 0.05 250), oklch(0.18 0.04 250));
+  --shadow-elegant: 0 20px 60px -20px oklch(0.1 0.04 250 / 0.6);
+  --shadow-gold: 0 0 40px -10px oklch(0.82 0.14 85 / 0.4);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +166,53 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-display);
+    background-image:
+      radial-gradient(ellipse at top, oklch(0.28 0.06 250 / 0.6), transparent 60%),
+      radial-gradient(ellipse at bottom, oklch(0.2 0.05 160 / 0.25), transparent 60%);
+    background-attachment: fixed;
   }
+}
+
+@layer utilities {
+  .font-arabic { font-family: var(--font-arabic); }
+  .font-display { font-family: var(--font-display); }
+  .text-gold { color: var(--gold); }
+  .text-emerald { color: var(--emerald); }
+  .bg-gold { background-color: var(--gold); }
+  .bg-emerald { background-color: var(--emerald); }
+  .bg-surface-1 { background-color: var(--surface-1); }
+  .bg-surface-2 { background-color: var(--surface-2); }
+  .bg-surface-3 { background-color: var(--surface-3); }
+  .border-gold { border-color: var(--gold); }
+  .border-emerald { border-color: var(--emerald); }
+  .bg-gradient-gold { background-image: var(--gradient-gold); }
+  .bg-gradient-surface { background-image: var(--gradient-surface); }
+  .shadow-elegant { box-shadow: var(--shadow-elegant); }
+  .shadow-gold { box-shadow: var(--shadow-gold); }
+
+  .islamic-pattern {
+    background-image:
+      radial-gradient(circle at 10px 10px, oklch(0.82 0.14 85 / 0.08) 1px, transparent 1px),
+      radial-gradient(circle at 30px 30px, oklch(0.55 0.13 160 / 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+  .animate-ticker { animation: ticker 45s linear infinite; }
+
+  @keyframes pulse-gold {
+    0%, 100% { box-shadow: 0 0 0 0 oklch(0.82 0.14 85 / 0.5); }
+    50% { box-shadow: 0 0 0 12px oklch(0.82 0.14 85 / 0); }
+  }
+  .animate-pulse-gold { animation: pulse-gold 2s ease-in-out infinite; }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in { animation: fade-in 0.6s ease-out; }
 }
