@@ -28,7 +28,7 @@ export function PrayerRow({ times, current, next }: Props) {
             className={[
               "relative flex flex-col items-center justify-center px-4 py-5 text-center transition-colors",
               isCurrent
-                ? "bg-gradient-gold text-primary-foreground animate-pulse-gold"
+                ? "bg-gradient-gold text-primary-foreground"
                 : isNext
                 ? "bg-emerald/15"
                 : "",
@@ -36,13 +36,13 @@ export function PrayerRow({ times, current, next }: Props) {
           >
             <p className={[
               "font-display text-2xl font-semibold tracking-wide",
-              isCurrent ? "text-primary-foreground" : "text-foreground",
+              isCurrent ? "text-primary-foreground animate-pulse-text" : "text-foreground",
             ].join(" ")}>
               {p.label}
             </p>
             <p className={[
               "mt-1 font-display text-5xl font-extrabold tabular-nums",
-              isCurrent ? "text-primary-foreground" : isNext ? "text-gold" : "text-foreground",
+              isCurrent ? "text-primary-foreground animate-pulse-text" : isNext ? "text-gold" : "text-foreground",
             ].join(" ")}>
               {formatTime12(times[p.key]).replace(/\s?[AP]M/, "")}
             </p>
