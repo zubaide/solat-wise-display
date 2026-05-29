@@ -14,16 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      announcements: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          message: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          message: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          message?: string
+        }
+        Relationships: []
+      }
+      mosque_settings: {
+        Row: {
+          donation_current: number
+          donation_goal: number
+          id: string
+          iqamah_asar: number
+          iqamah_isyak: number
+          iqamah_maghrib: number
+          iqamah_subuh: number
+          iqamah_zohor: number
+          mosque_name: string
+          ticker_speed: number
+          updated_at: string
+          zone: string
+        }
+        Insert: {
+          donation_current?: number
+          donation_goal?: number
+          id?: string
+          iqamah_asar?: number
+          iqamah_isyak?: number
+          iqamah_maghrib?: number
+          iqamah_subuh?: number
+          iqamah_zohor?: number
+          mosque_name?: string
+          ticker_speed?: number
+          updated_at?: string
+          zone?: string
+        }
+        Update: {
+          donation_current?: number
+          donation_goal?: number
+          id?: string
+          iqamah_asar?: number
+          iqamah_isyak?: number
+          iqamah_maghrib?: number
+          iqamah_subuh?: number
+          iqamah_zohor?: number
+          mosque_name?: string
+          ticker_speed?: number
+          updated_at?: string
+          zone?: string
+        }
+        Relationships: []
+      }
+      slideshow_images: {
+        Row: {
+          caption: string | null
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string
+          is_active: boolean
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url: string
+          is_active?: boolean
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          is_active?: boolean
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "editor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +272,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "editor"],
+    },
   },
 } as const
