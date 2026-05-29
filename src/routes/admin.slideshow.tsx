@@ -46,7 +46,14 @@ function SlideshowPage() {
     refetch();
   };
 
-  const updateField = async (id: string, patch: Record<string, unknown>) => {
+  type SlidePatch = Partial<{
+    interval_seconds: number;
+    show_header: boolean;
+    show_footer: boolean;
+    is_active: boolean;
+    caption: string | null;
+  }>;
+  const updateField = async (id: string, patch: SlidePatch) => {
     const { error } = await supabase.from("slideshow_images").update(patch).eq("id", id);
     if (error) toast.error(error.message);
     refetch();
