@@ -1,84 +1,62 @@
 import { useEffect, useState } from "react";
+import type { SlideshowImage } from "@/lib/display-data";
 
-interface Slide {
-  title: string;
-  subtitle?: string;
-  body?: string;
-  accent?: "gold" | "emerald";
+interface Props {
+  slides: SlideshowImage[];
+  donationGoal: number;
+  donationCurrent: number;
 }
 
-const DEFAULT_SLIDES: Slide[] = [
-  {
-    title: "Selamat Datang",
-    subtitle: "أهلا وسهلا",
-    body: "Ke Masjid kita yang tercinta. Semoga ibadah anda diterima Allah SWT.",
-    accent: "gold",
-  },
-  {
-    title: "Kuliah Maghrib",
-    subtitle: "Setiap Isnin & Khamis",
-    body: "Ustaz Ahmad bin Abdullah — Tafsir Surah Al-Baqarah",
-    accent: "emerald",
-  },
-  {
-    title: "Jadual Imam & Bilal",
-    subtitle: "Hari Ini",
-    body: "Imam: Ustaz Hafiz   ·   Bilal: Saudara Razak",
-    accent: "gold",
-  },
-  {
-    title: "Tabung Masjid",
-    subtitle: "Kutipan Bulan Ini",
-    body: "RM 12,450 / RM 25,000 sasaran — terima kasih atas sumbangan anda.",
-    accent: "emerald",
-  },
-];
+const FALLBACK_TITLE = {
+  title: "Selamat Datang",
+  subtitle: "أهلا وسهلا",
+  body: "Ke Masjid kita yang tercinta.",
+};
 
-const DONATION = { current: 12450, target: 25000, week: 2890 };
-
-export function RightPanel() {
+export function RightPanel({ slides, donationGoal, donationCurrent }: Props) {
   const [idx, setIdx] = useState(0);
+  const count = slides.length;
   useEffect(() => {
-    const id = setInterval(() => setIdx((i) => (i + 1) % DEFAULT_SLIDES.length), 8000);
+    if (count <= 1) return;
+    const id = setInterval(() => setIdx((i) => (i + 1) % count), 8000);
     return () => clearInterval(id);
-  }, []);
-  const slide = DEFAULT_SLIDES[idx];
-  const progress = Math.min(100, (DONATION.current / DONATION.target) * 100);
+  }, [count]);
+  const slide = slides[idx];
+  const progress = donationGoal > 0 ? Math.min(100, (donationCurrent / donationGoal) * 100) : 0;
 
   return (
     <aside className="flex h-full flex-col gap-4">
       <div className="flex-1 overflow-hidden rounded-2xl border border-gold/20 bg-gradient-surface shadow-elegant">
         <div className="relative h-full p-8">
-          <div
-            key={idx}
-            className="flex h-full animate-fade-in flex-col justify-center gap-4"
-          >
-            <p className={[
-              "text-xs uppercase tracking-[0.4em]",
-              slide.accent === "emerald" ? "text-emerald" : "text-gold",
-            ].join(" ")}>
-              {slide.subtitle}
-            </p>
-            <h3 className="font-display text-5xl font-bold text-foreground">
-              {slide.title}
-            </h3>
-            {slide.body && (
-              <p className="text-xl leading-relaxed text-muted-foreground">
-                {slide.body}
-              </p>
-            )}
-          </div>
-          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-            {DEFAULT_SLIDES.map((_, i) => (
-              <span
-                key={i}
-                className={[
-                  "h-1.5 rounded-full transition-all",
-                  i === idx ? "w-8 bg-gold" : "w-1.5 bg-gold/30",
-                ].join(" ")}
-              />
-            ))}
-          </div>
+          {slide ? (
+            <div key={slide.id} className="absolute inset-0 animate-fade-in">
+              <img src={slide.image_url} alt={slide.caption ?? ""} className="h-full w-full object-cover" />
+              {slide.caption && (
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                  <p className="font-display text-2xl font-bold text-white">{slide.caption}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex h-full flex-col justify-center gap-4">
+              <p className="text-xs uppercase tracking-[0.4em] text-gold">{FALLBACK_TITLE.subtitle}</p>
+              <h3 className="font-display text-5xl font-bold text-foreground">{FALLBACK_TITLE.title}</h3>
+              <p className="text-xl leading-relaxed text-muted-foreground">{FALLBACK_TITLE.body}</p>
+            </div>
+          )}
+          {count > 1 && (
+            <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+              {slides.map((_, i) => (
+                <span
+                  key={i}
+                  className={[
+                    "h-1.5 rounded-full transition-all",
+                    i === idx ? "w-8 bg-gold" : "w-1.5 bg-gold/50",
+                  ].join(" ")}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -87,16 +65,13 @@ export function RightPanel() {
           <span className="text-xs font-semibold uppercase tracking-widest text-emerald">
             Tabung Masjid
           </span>
-          <span className="text-sm text-muted-foreground">
-            Minggu ini: RM {DONATION.week.toLocaleString()}
-          </span>
         </div>
         <div className="mb-2 flex items-end justify-between">
           <span className="font-display text-2xl font-bold text-foreground">
-            RM {DONATION.current.toLocaleString()}
+            RM {Number(donationCurrent).toLocaleString()}
           </span>
           <span className="text-sm text-muted-foreground">
-            / RM {DONATION.target.toLocaleString()}
+            / RM {Number(donationGoal).toLocaleString()}
           </span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-surface-3">

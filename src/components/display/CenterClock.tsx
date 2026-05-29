@@ -17,13 +17,15 @@ function klClockParts() {
 }
 
 export function CenterClock({ nextKey, nextAt }: Props) {
+  const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
+    setMounted(true);
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  const { h, m, s } = klClockParts();
+  const { h, m, s } = mounted ? klClockParts() : { h: "--", m: "--", s: "--" };
   const remaining = Math.max(0, Math.floor((nextAt.getTime() - now.getTime()) / 1000));
   const urgent = remaining > 0 && remaining <= 15 * 60;
   const nextLabel = PRAYER_LABELS.find((p) => p.key === nextKey)!;
@@ -57,7 +59,7 @@ export function CenterClock({ nextKey, nextAt }: Props) {
             ? "border-warning bg-warning/15 text-warning animate-pulse"
             : "border-emerald/40 bg-emerald/10 text-emerald",
         ].join(" ")}>
-          {formatHMS(remaining)}
+          {mounted ? formatHMS(remaining) : "--:--:--"}
         </div>
       </div>
     </section>

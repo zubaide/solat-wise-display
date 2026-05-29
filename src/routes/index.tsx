@@ -8,9 +8,7 @@ import { PrayerList } from "@/components/display/PrayerList";
 import { CenterClock } from "@/components/display/CenterClock";
 import { RightPanel } from "@/components/display/RightPanel";
 import { Ticker } from "@/components/display/Ticker";
-
-const DEFAULT_ZONE = "SGR02";
-const MOSQUE_NAME = "Masjid Al-Hidayah";
+import { useMosqueSettings, useAnnouncements, useSlideshow, useRealtimeDisplay } from "@/lib/display-data";
 
 const prayerQuery = (zone: string) =>
   queryOptions({
@@ -30,7 +28,7 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(prayerQuery(DEFAULT_ZONE)),
+    context.queryClient.ensureQueryData(prayerQuery("SGR02")),
   component: Index,
   errorComponent: ({ error }) => (
     <div className="flex min-h-screen items-center justify-center p-8 text-center">
@@ -43,7 +41,12 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { data } = useSuspenseQuery(prayerQuery(DEFAULT_ZONE));
+  useRealtimeDisplay();
+  const { data: settings } = useMosqueSettings();
+  const zone = settings?.zone ?? "SGR02";
+  const { data } = useSuspenseQuery(prayerQuery(zone));
+  const { data: announcements } = useAnnouncements();
+  const { data: slides } = useSlideshow();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -53,20 +56,22 @@ function Index() {
 
   const { current, next } = useMemo(() => getCurrentAndNext(data, now), [data, now]);
 
-  const tickerMessages = [
-    "Selamat datang ke Masjid Al-Hidayah",
-    "Kuliah Subuh: Setiap hari Sabtu selepas solat Subuh",
-    "Sumbangan tabung masjid amat dihargai — RM 25,000 sasaran tahun ini",
-    "Jangan lupa solat sunat Rawatib selepas Zohor dan Maghrib",
-  ];
+  const tickerMessages = (announcements?.length ? announcements.map((a) => a.message) : [
+    "Selamat datang ke masjid",
+  ]);
+  const mosqueName = settings?.mosque_name ?? "Masjid";
 
   return (
     <div className="flex h-screen min-h-screen w-full flex-col overflow-hidden bg-background text-foreground">
-      <TopBar mosqueName={MOSQUE_NAME} zone={data.zone} />
+      <TopBar mosqueName={mosqueName} zone={data.zone} />
       <main className="grid flex-1 gap-4 overflow-hidden p-4 lg:grid-cols-[1fr_1.6fr_1fr]">
         <PrayerList times={data} current={current} next={next?.key ?? null} />
         {next && <CenterClock nextKey={next.key} nextAt={next.at} />}
-        <RightPanel />
+        <RightPanel
+          slides={slides ?? []}
+          donationGoal={settings?.donation_goal ?? 0}
+          donationCurrent={settings?.donation_current ?? 0}
+        />
       </main>
       <Ticker messages={tickerMessages} />
       {data.source === "fallback" && (
