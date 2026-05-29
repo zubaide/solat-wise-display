@@ -28,7 +28,7 @@ export function PrayerRow({ times, current, next }: Props) {
             className={[
               "relative flex flex-col items-center justify-center px-4 py-5 text-center transition-colors",
               isCurrent
-                ? "bg-gradient-gold text-primary-foreground"
+                ? "bg-gradient-gold text-primary-foreground animate-pulse-gold"
                 : isNext
                 ? "bg-emerald/15"
                 : "",

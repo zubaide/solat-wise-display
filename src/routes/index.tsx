@@ -9,6 +9,8 @@ import { HeroSlideshow } from "@/components/display/HeroSlideshow";
 import { AnalogClock } from "@/components/display/AnalogClock";
 import { Ticker } from "@/components/display/Ticker";
 import { useMosqueSettings, useAnnouncements, useSlideshow, useRealtimeDisplay } from "@/lib/display-data";
+import type { SlideshowImage } from "@/lib/display-data";
+import { useCallback } from "react";
 
 const prayerQuery = (zone: string) =>
   queryOptions({
@@ -48,6 +50,8 @@ function Index() {
   const { data: announcements } = useAnnouncements();
   const { data: slides } = useSlideshow();
   const [now, setNow] = useState(() => new Date());
+  const [activeSlide, setActiveSlide] = useState<SlideshowImage | null>(null);
+  const handleSlide = useCallback((s: SlideshowImage | null) => setActiveSlide(s), []);
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
@@ -60,10 +64,13 @@ function Index() {
     "Selamat datang ke masjid",
   ]);
   const mosqueName = settings?.mosque_name ?? "Masjid";
+  // When there are no slides, default to showing chrome.
+  const showHeader = activeSlide ? activeSlide.show_header : true;
+  const showFooter = activeSlide ? activeSlide.show_footer : true;
 
   return (
     <div className="flex h-screen min-h-screen w-full flex-col overflow-hidden bg-background text-foreground">
-      {next && (
+      {next && showHeader && (
         <TopBar
           mosqueName={mosqueName}
           mosqueAddress={`Zon ${data.zone}`}
@@ -72,18 +79,21 @@ function Index() {
         />
       )}
       <main className="relative flex-1 overflow-hidden p-4">
-        <HeroSlideshow slides={slides ?? []} />
+        <HeroSlideshow slides={slides ?? []} onSlideChange={handleSlide} />
       </main>
-      <div className="relative px-4 pb-2">
-        {/* Analog clock overlaps the prayer row */}
-        <div className="pointer-events-none absolute -top-24 left-6 z-20 h-44 w-44">
-          <AnalogClock label={mosqueName.toUpperCase()} />
-        </div>
-        <div className="ml-44 pl-6">
-          <PrayerRow times={data} current={current} next={next?.key ?? null} />
-        </div>
-      </div>
-      <Ticker messages={tickerMessages} />
+      {showFooter && (
+        <>
+          <div className="relative px-4 pb-2">
+            <div className="pointer-events-none absolute -top-24 left-6 z-20 h-44 w-44">
+              <AnalogClock label={mosqueName.toUpperCase()} />
+            </div>
+            <div className="ml-44 pl-6">
+              <PrayerRow times={data} current={current} next={next?.key ?? null} />
+            </div>
+          </div>
+          <Ticker messages={tickerMessages} />
+        </>
+      )}
       {data.source === "fallback" && (
         <div className="absolute right-4 top-20 rounded-md bg-warning/20 px-3 py-1 text-xs text-warning">
           Menggunakan waktu sandaran (JAKIM API tidak tersedia)

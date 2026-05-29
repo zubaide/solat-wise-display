@@ -29,6 +29,9 @@ export interface SlideshowImage {
   caption: string | null;
   is_active: boolean;
   display_order: number;
+  interval_seconds: number;
+  show_header: boolean;
+  show_footer: boolean;
 }
 
 export function useMosqueSettings() {
