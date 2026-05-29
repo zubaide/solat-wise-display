@@ -166,5 +166,53 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-display);
+    background-image:
+      radial-gradient(ellipse at top, oklch(0.28 0.06 250 / 0.6), transparent 60%),
+      radial-gradient(ellipse at bottom, oklch(0.2 0.05 160 / 0.25), transparent 60%);
+    background-attachment: fixed;
   }
+}
+
+@layer utilities {
+  .font-arabic { font-family: var(--font-arabic); }
+  .font-display { font-family: var(--font-display); }
+  .text-gold { color: var(--gold); }
+  .text-emerald { color: var(--emerald); }
+  .bg-gold { background-color: var(--gold); }
+  .bg-emerald { background-color: var(--emerald); }
+  .bg-surface-1 { background-color: var(--surface-1); }
+  .bg-surface-2 { background-color: var(--surface-2); }
+  .bg-surface-3 { background-color: var(--surface-3); }
+  .border-gold { border-color: var(--gold); }
+  .border-emerald { border-color: var(--emerald); }
+  .bg-gradient-gold { background-image: var(--gradient-gold); }
+  .bg-gradient-surface { background-image: var(--gradient-surface); }
+  .shadow-elegant { box-shadow: var(--shadow-elegant); }
+  .shadow-gold { box-shadow: var(--shadow-gold); }
+
+  .islamic-pattern {
+    background-image:
+      radial-gradient(circle at 10px 10px, oklch(0.82 0.14 85 / 0.08) 1px, transparent 1px),
+      radial-gradient(circle at 30px 30px, oklch(0.55 0.13 160 / 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+  .animate-ticker { animation: ticker 45s linear infinite; }
+
+  @keyframes pulse-gold {
+    0%, 100% { box-shadow: 0 0 0 0 oklch(0.82 0.14 85 / 0.5); }
+    50% { box-shadow: 0 0 0 12px oklch(0.82 0.14 85 / 0); }
+  }
+  .animate-pulse-gold { animation: pulse-gold 2s ease-in-out infinite; }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in { animation: fade-in 0.6s ease-out; }
 }
