@@ -90,7 +90,10 @@ export type Database = {
           display_order: number
           id: string
           image_url: string
+          interval_seconds: number
           is_active: boolean
+          show_footer: boolean
+          show_header: boolean
         }
         Insert: {
           caption?: string | null
@@ -98,7 +101,10 @@ export type Database = {
           display_order?: number
           id?: string
           image_url: string
+          interval_seconds?: number
           is_active?: boolean
+          show_footer?: boolean
+          show_header?: boolean
         }
         Update: {
           caption?: string | null
@@ -106,7 +112,10 @@ export type Database = {
           display_order?: number
           id?: string
           image_url?: string
+          interval_seconds?: number
           is_active?: boolean
+          show_footer?: boolean
+          show_header?: boolean
         }
         Relationships: []
       }
