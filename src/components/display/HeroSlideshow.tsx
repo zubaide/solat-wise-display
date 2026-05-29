@@ -4,15 +4,29 @@ import type { SlideshowImage } from "@/lib/display-data";
 const FALLBACK =
   "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=2400&q=80";
 
-export function HeroSlideshow({ slides }: { slides: SlideshowImage[] }) {
+export function HeroSlideshow({
+  slides,
+  onSlideChange,
+}: {
+  slides: SlideshowImage[];
+  onSlideChange?: (slide: SlideshowImage | null) => void;
+}) {
   const [idx, setIdx] = useState(0);
   const count = slides.length;
+  const safeIdx = count > 0 ? idx % count : 0;
+  const slide = slides[safeIdx];
+  const intervalMs = Math.max(2, slide?.interval_seconds ?? 8) * 1000;
+
   useEffect(() => {
     if (count <= 1) return;
-    const id = setInterval(() => setIdx((i) => (i + 1) % count), 8000);
-    return () => clearInterval(id);
-  }, [count]);
-  const slide = slides[idx];
+    const id = setTimeout(() => setIdx((i) => (i + 1) % count), intervalMs);
+    return () => clearTimeout(id);
+  }, [count, intervalMs, safeIdx]);
+
+  useEffect(() => {
+    onSlideChange?.(slide ?? null);
+  }, [slide, onSlideChange]);
+
   const url = slide?.image_url ?? FALLBACK;
 
   return (
@@ -36,7 +50,7 @@ export function HeroSlideshow({ slides }: { slides: SlideshowImage[] }) {
               key={i}
               className={[
                 "h-1.5 rounded-full transition-all",
-                i === idx ? "w-8 bg-gold" : "w-1.5 bg-gold/60",
+                i === safeIdx ? "w-8 bg-gold" : "w-1.5 bg-gold/60",
               ].join(" ")}
             />
           ))}
