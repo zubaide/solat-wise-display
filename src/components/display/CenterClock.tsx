@@ -59,7 +59,7 @@ export function CenterClock({ nextKey, nextAt }: Props) {
             ? "border-warning bg-warning/15 text-warning animate-pulse"
             : "border-emerald/40 bg-emerald/10 text-emerald",
         ].join(" ")}>
-          {formatHMS(remaining)}
+          {mounted ? formatHMS(remaining) : "--:--:--"}
         </div>
       </div>
     </section>
