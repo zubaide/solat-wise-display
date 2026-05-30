@@ -104,10 +104,18 @@ function bootstrap(d: Database.Database) {
 
 export function getSessionSecret(): string {
   if (process.env.SESSION_SECRET) return process.env.SESSION_SECRET;
-  const row = db()
-    .prepare("SELECT value FROM app_meta WHERE key = 'session_secret'")
-    .get() as { value: string };
-  return row.value;
+  try {
+    const row = db()
+      .prepare("SELECT value FROM app_meta WHERE key = 'session_secret'")
+      .get() as { value: string } | undefined;
+    if (row?.value) return row.value;
+  } catch {
+    // DB unavailable (e.g. ephemeral preview runtime) — fall through.
+  }
+  // Stable fallback so sessions survive across requests even when the
+  // SQLite file is ephemeral (Lovable preview / Workers). On the Pi the
+  // DB-stored secret above is used instead.
+  return "mosque-tv-fallback-session-secret-change-in-production-please-32b";
 }
 
 // ---------- Row mappers ----------
