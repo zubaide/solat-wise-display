@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { updateSettings } from "@/lib/settings.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,28 +29,23 @@ function SettingsPage() {
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase
-      .from("mosque_settings")
-      .update({
-        mosque_name: form.mosque_name as string,
-        zone: form.zone as string,
-        iqamah_subuh: Number(form.iqamah_subuh),
-        iqamah_zohor: Number(form.iqamah_zohor),
-        iqamah_asar: Number(form.iqamah_asar),
-        iqamah_maghrib: Number(form.iqamah_maghrib),
-        iqamah_isyak: Number(form.iqamah_isyak),
-        ticker_speed: Number(form.ticker_speed),
-        donation_goal: Number(form.donation_goal),
-        donation_current: Number(form.donation_current),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", data.id);
-    setSaving(false);
-    if (error) toast.error(error.message);
-    else {
+    try {
+      await updateSettings({ data: {
+        mosque_name: String(form.mosque_name ?? ""),
+        zone: String(form.zone ?? "SGR02"),
+        iqamah_subuh: Number(form.iqamah_subuh ?? 0),
+        iqamah_zohor: Number(form.iqamah_zohor ?? 0),
+        iqamah_asar: Number(form.iqamah_asar ?? 0),
+        iqamah_maghrib: Number(form.iqamah_maghrib ?? 0),
+        iqamah_isyak: Number(form.iqamah_isyak ?? 0),
+        ticker_speed: Number(form.ticker_speed ?? 40),
+        donation_goal: Number(form.donation_goal ?? 0),
+        donation_current: Number(form.donation_current ?? 0),
+      }});
       toast.success("Tetapan disimpan");
       refetch();
-    }
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Ralat"); }
+    finally { setSaving(false); }
   };
 
   return (
