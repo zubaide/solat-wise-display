@@ -44,9 +44,7 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <div className="w-full max-w-md rounded-2xl border border-gold/20 bg-surface-1/80 p-8 shadow-elegant">
         <h1 className="mb-2 font-display text-3xl font-bold text-gold">Admin Masjid</h1>
-        <p className="mb-6 text-sm text-muted-foreground">
-          {mode === "signin" ? "Log masuk untuk uruskan paparan." : "Cipta akaun admin baharu."}
-        </p>
+        <p className="mb-6 text-sm text-muted-foreground">Log masuk untuk uruskan paparan.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="password">Kata Laluan Admin</Label>
