@@ -1,24 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { getPrayerTimes } from "@/lib/prayer.functions";
 import { getCurrentAndNext } from "@/lib/prayer-utils";
 import { TopBar } from "@/components/display/TopBar";
 import { PrayerRow } from "@/components/display/PrayerRow";
 import { HeroSlideshow } from "@/components/display/HeroSlideshow";
 import { AnalogClock } from "@/components/display/AnalogClock";
 import { Ticker } from "@/components/display/Ticker";
-import { useMosqueSettings, useAnnouncements, useSlideshow, useRealtimeDisplay } from "@/lib/display-data";
+import { useDisplay, useRealtimeDisplay } from "@/lib/display-data";
 import type { SlideshowImage } from "@/lib/display-data";
 import { useCallback } from "react";
-
-const prayerQuery = (zone: string) =>
-  queryOptions({
-    queryKey: ["prayer-times", zone],
-    queryFn: () => getPrayerTimes({ data: { zone } }),
-    staleTime: 6 * 60 * 60 * 1000,
-    refetchInterval: 6 * 60 * 60 * 1000,
-  });
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,8 +19,6 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Paparan TV waktu solat, kuliah, dan pengumuman masjid." },
     ],
   }),
-  loader: ({ context }) =>
-    context.queryClient.ensureQueryData(prayerQuery("SGR02")),
   component: Index,
   errorComponent: ({ error }) => (
     <div className="flex min-h-screen items-center justify-center p-8 text-center">
@@ -44,11 +32,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   useRealtimeDisplay();
-  const { data: settings } = useMosqueSettings();
-  const zone = settings?.zone ?? "SGR02";
-  const { data } = useSuspenseQuery(prayerQuery(zone));
-  const { data: announcements } = useAnnouncements();
-  const { data: slides } = useSlideshow();
+  const { data: display, isLoading } = useDisplay();
   const [now, setNow] = useState(() => new Date());
   const [activeSlide, setActiveSlide] = useState<SlideshowImage | null>(null);
   const handleSlide = useCallback((s: SlideshowImage | null) => setActiveSlide(s), []);
@@ -58,7 +42,23 @@ function Index() {
     return () => clearInterval(id);
   }, []);
 
-  const { current, next } = useMemo(() => getCurrentAndNext(data, now), [data, now]);
+  const data = display?.prayer;
+  const settings = display?.settings;
+  const announcements = display?.announcements;
+  const slides = display?.slides;
+
+  const { current, next } = useMemo(
+    () => (data ? getCurrentAndNext(data, now) : { current: null, next: null }),
+    [data, now],
+  );
+
+  if (isLoading || !data) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
+        Memuatkan…
+      </div>
+    );
+  }
 
   const tickerMessages = (announcements?.length ? announcements.map((a) => a.message) : [
     "Selamat datang ke masjid",

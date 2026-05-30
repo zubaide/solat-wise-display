@@ -1,43 +1,52 @@
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-import { db, type SettingsRow } from "@/server/db.server";
-import { requireAdmin } from "@/server/session.server";
-import { emit } from "@/server/events.server";
+// Thin client-side fetch wrappers. All real logic lives in server routes
+// under src/routes/api/. No imports from @/server/* are allowed here because
+// this module is reachable from client code via @/lib/display-data.
 
-export const getSettings = createServerFn({ method: "GET" }).handler(async (): Promise<SettingsRow> => {
-  const row = db().prepare("SELECT * FROM mosque_settings LIMIT 1").get() as SettingsRow;
-  return row;
-});
+export interface SettingsRow {
+  id: string;
+  mosque_name: string;
+  zone: string;
+  iqamah_subuh: number;
+  iqamah_zohor: number;
+  iqamah_asar: number;
+  iqamah_maghrib: number;
+  iqamah_isyak: number;
+  ticker_speed: number;
+  donation_goal: number;
+  donation_current: number;
+}
 
-const UpdateSchema = z.object({
-  mosque_name: z.string().min(1).max(120),
-  zone: z.string().min(3).max(10),
-  iqamah_subuh: z.number().int().min(0).max(60),
-  iqamah_zohor: z.number().int().min(0).max(60),
-  iqamah_asar: z.number().int().min(0).max(60),
-  iqamah_maghrib: z.number().int().min(0).max(60),
-  iqamah_isyak: z.number().int().min(0).max(60),
-  ticker_speed: z.number().int().min(5).max(300),
-  donation_goal: z.number().min(0),
-  donation_current: z.number().min(0),
-});
+export interface SettingsUpdate {
+  mosque_name: string;
+  zone: string;
+  iqamah_subuh: number;
+  iqamah_zohor: number;
+  iqamah_asar: number;
+  iqamah_maghrib: number;
+  iqamah_isyak: number;
+  ticker_speed: number;
+  donation_goal: number;
+  donation_current: number;
+}
 
-export const updateSettings = createServerFn({ method: "POST" })
-  .middleware([requireAdmin])
-  .inputValidator((d) => UpdateSchema.parse(d))
-  .handler(async ({ data }) => {
-    db()
-      .prepare(
-        `UPDATE mosque_settings SET
-          mosque_name=@mosque_name, zone=@zone,
-          iqamah_subuh=@iqamah_subuh, iqamah_zohor=@iqamah_zohor,
-          iqamah_asar=@iqamah_asar, iqamah_maghrib=@iqamah_maghrib,
-          iqamah_isyak=@iqamah_isyak,
-          ticker_speed=@ticker_speed,
-          donation_goal=@donation_goal, donation_current=@donation_current,
-          updated_at=datetime('now')`,
-      )
-      .run(data);
-    emit("settings");
-    return { ok: true };
-  });
+async function jsonOrThrow(res: Response) {
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error(t || `Request failed (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function getSettings(): Promise<SettingsRow> {
+  return jsonOrThrow(await fetch("/api/data/settings"));
+}
+
+export async function updateSettings(args: { data: SettingsUpdate }): Promise<{ ok: true }> {
+  return jsonOrThrow(
+    await fetch("/api/admin/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(args.data),
+    }),
+  );
+}
