@@ -17,6 +17,7 @@ import { Route as ApiEventsRouteImport } from './routes/api/events'
 import { Route as AdminSlideshowRouteImport } from './routes/admin.slideshow'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as ApiUploadsSplatRouteImport } from './routes/api/uploads.$'
+import { Route as ApiDataSettingsRouteImport } from './routes/api/data.settings'
 import { Route as ApiDataDisplayRouteImport } from './routes/api/data.display'
 import { Route as ApiAdminUploadRouteImport } from './routes/api/admin.upload'
 import { Route as ApiAdminPrayerTimesRouteImport } from './routes/api/admin.prayer-times'
@@ -61,6 +62,11 @@ const ApiUploadsSplatRoute = ApiUploadsSplatRouteImport.update({
   path: '/api/uploads/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDataSettingsRoute = ApiDataSettingsRouteImport.update({
+  id: '/api/data/settings',
+  path: '/api/data/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDataDisplayRoute = ApiDataDisplayRouteImport.update({
   id: '/api/data/display',
   path: '/api/data/display',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
   '/api/data/display': typeof ApiDataDisplayRoute
+  '/api/data/settings': typeof ApiDataSettingsRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
 export interface FileRoutesByTo {
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
   '/api/data/display': typeof ApiDataDisplayRoute
+  '/api/data/settings': typeof ApiDataSettingsRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
 export interface FileRoutesById {
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
   '/api/data/display': typeof ApiDataDisplayRoute
+  '/api/data/settings': typeof ApiDataSettingsRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
 export interface FileRouteTypes {
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/api/admin/prayer-times'
     | '/api/admin/upload'
     | '/api/data/display'
+    | '/api/data/settings'
     | '/api/uploads/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/api/admin/prayer-times'
     | '/api/admin/upload'
     | '/api/data/display'
+    | '/api/data/settings'
     | '/api/uploads/$'
   id:
     | '__root__'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/api/admin/prayer-times'
     | '/api/admin/upload'
     | '/api/data/display'
+    | '/api/data/settings'
     | '/api/uploads/$'
   fileRoutesById: FileRoutesById
 }
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   ApiAdminPrayerTimesRoute: typeof ApiAdminPrayerTimesRoute
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
   ApiDataDisplayRoute: typeof ApiDataDisplayRoute
+  ApiDataSettingsRoute: typeof ApiDataSettingsRoute
   ApiUploadsSplatRoute: typeof ApiUploadsSplatRoute
 }
 
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUploadsSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/data/settings': {
+      id: '/api/data/settings'
+      path: '/api/data/settings'
+      fullPath: '/api/data/settings'
+      preLoaderRoute: typeof ApiDataSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/data/display': {
       id: '/api/data/display'
       path: '/api/data/display'
@@ -272,8 +292,19 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminPrayerTimesRoute: ApiAdminPrayerTimesRoute,
   ApiAdminUploadRoute: ApiAdminUploadRoute,
   ApiDataDisplayRoute: ApiDataDisplayRoute,
+  ApiDataSettingsRoute: ApiDataSettingsRoute,
   ApiUploadsSplatRoute: ApiUploadsSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
