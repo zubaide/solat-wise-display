@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useSlideshow } from "@/lib/display-data";
+import { addSlide, updateSlide, deleteSlide } from "@/lib/slideshow.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -24,25 +24,35 @@ function SlideshowPage() {
   const [showFooter, setShowFooter] = useState(true);
 
   const add = async () => {
-    if (!url.trim()) return;
-    const { error } = await supabase.from("slideshow_images").insert({
-      image_url: url.trim(),
-      caption: caption.trim() || null,
-      display_order: (data?.length ?? 0) + 1,
-      interval_seconds: Math.max(2, Number(interval) || 8),
-      show_header: showHeader,
-      show_footer: showFooter,
-    });
-    if (error) toast.error(error.message);
-    else {
+    let imageUrl = url.trim();
+    try {
+      if (!imageUrl) return;
+      // If URL is a local file path triggered via file picker, upload first
+      await addSlide({ data: {
+        image_url: imageUrl,
+        caption: caption.trim() || null,
+        interval_seconds: Math.max(2, Number(interval) || 8),
+        show_header: showHeader,
+        show_footer: showFooter,
+      }});
       setUrl(""); setCaption("");
       toast.success("Slaid ditambah");
       refetch();
-    }
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Ralat"); }
+  };
+
+  const uploadFile = async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+    if (!res.ok) { toast.error("Muat naik gagal"); return; }
+    const j = await res.json() as { url: string };
+    setUrl(j.url);
+    toast.success("Imej dimuat naik — tekan Tambah Slaid");
   };
 
   const toggle = async (id: string, is_active: boolean) => {
-    await supabase.from("slideshow_images").update({ is_active }).eq("id", id);
+    await updateSlide({ data: { id, is_active } });
     refetch();
   };
 
@@ -54,13 +64,12 @@ function SlideshowPage() {
     caption: string | null;
   }>;
   const updateField = async (id: string, patch: SlidePatch) => {
-    const { error } = await supabase.from("slideshow_images").update(patch).eq("id", id);
-    if (error) toast.error(error.message);
-    refetch();
+    try { await updateSlide({ data: { id, ...patch } }); refetch(); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Ralat"); }
   };
 
   const remove = async (id: string) => {
-    await supabase.from("slideshow_images").delete().eq("id", id);
+    await deleteSlide({ data: { id } });
     refetch();
   };
 
@@ -75,7 +84,12 @@ function SlideshowPage() {
       </div>
 
       <div className="space-y-3 rounded-lg border border-border bg-surface-2/40 p-4">
-        <Input placeholder="URL imej (https://...)" value={url} onChange={(e) => setUrl(e.target.value)} />
+        <Input
+          type="file"
+          accept="image/*"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadFile(f); }}
+        />
+        <Input placeholder="atau URL imej" value={url} onChange={(e) => setUrl(e.target.value)} />
         <Input placeholder="Kapsyen (pilihan)" value={caption} onChange={(e) => setCaption(e.target.value)} />
         <div className="grid grid-cols-3 gap-3">
           <div>
