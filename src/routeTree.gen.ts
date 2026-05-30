@@ -17,6 +17,7 @@ import { Route as AdminSlideshowRouteImport } from './routes/admin.slideshow'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as ApiUploadsSplatRouteImport } from './routes/api/uploads.$'
 import { Route as ApiAdminUploadRouteImport } from './routes/api/admin.upload'
+import { Route as ApiAdminPrayerTimesRouteImport } from './routes/api/admin.prayer-times'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -58,6 +59,11 @@ const ApiAdminUploadRoute = ApiAdminUploadRouteImport.update({
   path: '/api/admin/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminPrayerTimesRoute = ApiAdminPrayerTimesRouteImport.update({
+  id: '/api/admin/prayer-times',
+  path: '/api/admin/prayer-times',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
   '/admin': typeof AdminIndexRoute
+  '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/admin/announcements'
     | '/admin/slideshow'
     | '/admin/'
+    | '/api/admin/prayer-times'
     | '/api/admin/upload'
     | '/api/uploads/$'
   fileRoutesByTo: FileRoutesByTo
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/admin/announcements'
     | '/admin/slideshow'
     | '/admin'
+    | '/api/admin/prayer-times'
     | '/api/admin/upload'
     | '/api/uploads/$'
   id:
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/admin/announcements'
     | '/admin/slideshow'
     | '/admin/'
+    | '/api/admin/prayer-times'
     | '/api/admin/upload'
     | '/api/uploads/$'
   fileRoutesById: FileRoutesById
@@ -125,6 +137,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiAdminPrayerTimesRoute: typeof ApiAdminPrayerTimesRoute
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
   ApiUploadsSplatRoute: typeof ApiUploadsSplatRoute
 }
@@ -187,6 +200,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/prayer-times': {
+      id: '/api/admin/prayer-times'
+      path: '/api/admin/prayer-times'
+      fullPath: '/api/admin/prayer-times'
+      preLoaderRoute: typeof ApiAdminPrayerTimesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -208,6 +228,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiAdminPrayerTimesRoute: ApiAdminPrayerTimesRoute,
   ApiAdminUploadRoute: ApiAdminUploadRoute,
   ApiUploadsSplatRoute: ApiUploadsSplatRoute,
 }
