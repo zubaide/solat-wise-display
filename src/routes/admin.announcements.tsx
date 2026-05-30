@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAnnouncements } from "@/lib/display-data";
+import { addAnnouncement, updateAnnouncement, deleteAnnouncement } from "@/lib/announcements.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -20,25 +20,19 @@ function AnnouncementsPage() {
 
   const add = async () => {
     if (!newMsg.trim()) return;
-    const { error } = await supabase.from("announcements").insert({
-      message: newMsg.trim(),
-      display_order: (data?.length ?? 0) + 1,
-    });
-    if (error) toast.error(error.message);
-    else {
+    try {
+      await addAnnouncement({ data: { message: newMsg.trim() } });
       setNewMsg("");
       toast.success("Pengumuman ditambah");
       refetch();
-    }
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Ralat"); }
   };
-
   const toggle = async (id: string, is_active: boolean) => {
-    await supabase.from("announcements").update({ is_active }).eq("id", id);
+    await updateAnnouncement({ data: { id, is_active } });
     refetch();
   };
-
   const remove = async (id: string) => {
-    await supabase.from("announcements").delete().eq("id", id);
+    await deleteAnnouncement({ data: { id } });
     refetch();
   };
 
