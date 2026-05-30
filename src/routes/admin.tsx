@@ -17,32 +17,20 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const { user, isAdmin, loading, signOut } = useAuth();
+  const { isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !isAdmin) {
       navigate({ to: "/login" });
     }
-  }, [loading, user, navigate]);
+  }, [loading, isAdmin, navigate]);
 
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Memuatkan...</div>;
   }
-  if (!user) return null;
-
-  if (!isAdmin) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-8 text-center">
-        <h1 className="text-2xl font-bold text-gold">Akses ditolak</h1>
-        <p className="max-w-md text-muted-foreground">
-          Akaun anda ({user.email}) belum mempunyai peranan admin. Sila minta admin sedia ada untuk menetapkan peranan anda dalam jadual <code className="rounded bg-surface-2 px-1">user_roles</code>.
-        </p>
-        <Button variant="outline" onClick={() => signOut()}>Log keluar</Button>
-      </div>
-    );
-  }
+  if (!isAdmin) return null;
 
   const navItems = [
     { to: "/admin", label: "Tetapan", icon: Settings, exact: true },
@@ -61,8 +49,8 @@ function AdminLayout() {
             </Link>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground">{user.email}</span>
-            <Button size="sm" variant="ghost" onClick={() => signOut()}>
+            <span className="text-muted-foreground">Admin</span>
+            <Button size="sm" variant="ghost" onClick={() => signOut().then(() => navigate({ to: "/login" }))}>
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
