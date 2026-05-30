@@ -17,6 +17,7 @@ import { Route as ApiEventsRouteImport } from './routes/api/events'
 import { Route as AdminSlideshowRouteImport } from './routes/admin.slideshow'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as ApiUploadsSplatRouteImport } from './routes/api/uploads.$'
+import { Route as ApiDataDisplayRouteImport } from './routes/api/data.display'
 import { Route as ApiAdminUploadRouteImport } from './routes/api/admin.upload'
 import { Route as ApiAdminPrayerTimesRouteImport } from './routes/api/admin.prayer-times'
 
@@ -60,6 +61,11 @@ const ApiUploadsSplatRoute = ApiUploadsSplatRouteImport.update({
   path: '/api/uploads/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDataDisplayRoute = ApiDataDisplayRouteImport.update({
+  id: '/api/data/display',
+  path: '/api/data/display',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminUploadRoute = ApiAdminUploadRouteImport.update({
   id: '/api/admin/upload',
   path: '/api/admin/upload',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
+  '/api/data/display': typeof ApiDataDisplayRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
 export interface FileRoutesByTo {
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
+  '/api/data/display': typeof ApiDataDisplayRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
 export interface FileRoutesById {
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
+  '/api/data/display': typeof ApiDataDisplayRoute
   '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
 export interface FileRouteTypes {
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/api/admin/prayer-times'
     | '/api/admin/upload'
+    | '/api/data/display'
     | '/api/uploads/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/api/admin/prayer-times'
     | '/api/admin/upload'
+    | '/api/data/display'
     | '/api/uploads/$'
   id:
     | '__root__'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/api/admin/prayer-times'
     | '/api/admin/upload'
+    | '/api/data/display'
     | '/api/uploads/$'
   fileRoutesById: FileRoutesById
 }
@@ -152,6 +164,7 @@ export interface RootRouteChildren {
   ApiEventsRoute: typeof ApiEventsRoute
   ApiAdminPrayerTimesRoute: typeof ApiAdminPrayerTimesRoute
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
+  ApiDataDisplayRoute: typeof ApiDataDisplayRoute
   ApiUploadsSplatRoute: typeof ApiUploadsSplatRoute
 }
 
@@ -213,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUploadsSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/data/display': {
+      id: '/api/data/display'
+      path: '/api/data/display'
+      fullPath: '/api/data/display'
+      preLoaderRoute: typeof ApiDataDisplayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/upload': {
       id: '/api/admin/upload'
       path: '/api/admin/upload'
@@ -251,18 +271,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEventsRoute: ApiEventsRoute,
   ApiAdminPrayerTimesRoute: ApiAdminPrayerTimesRoute,
   ApiAdminUploadRoute: ApiAdminUploadRoute,
+  ApiDataDisplayRoute: ApiDataDisplayRoute,
   ApiUploadsSplatRoute: ApiUploadsSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
