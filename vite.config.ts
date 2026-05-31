@@ -12,4 +12,17 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // Shim `process.env.NODE_ENV` for the client bundle. Some libraries
+    // (and TanStack Start's hydrateStart) reference it at runtime; on
+    // stricter Chromium builds (e.g. Raspberry Pi) an undefined `process`
+    // global crashes hydration with "ReferenceError: process is not defined".
+    // We only shim NODE_ENV — never the whole `process.env` object —
+    // because the SSR bundle still needs real `process.env.X` access.
+    define: {
+      "process.env.NODE_ENV": JSON.stringify(
+        process.env.NODE_ENV ?? "production",
+      ),
+    },
+  },
 });
