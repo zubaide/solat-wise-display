@@ -105,6 +105,17 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        {/* Polyfill `process` in the browser before any module evaluates.
+            Some bundled libs (e.g. supabase client SSR fallbacks, TanStack
+            hydrateStart) reference process.env.* at runtime; without this,
+            stricter Chromium builds (Raspberry Pi) crash hydration with
+            "ReferenceError: process is not defined". */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "window.process=window.process||{env:{NODE_ENV:'production'}};",
+          }}
+        />
         <HeadContent />
       </head>
       <body>
