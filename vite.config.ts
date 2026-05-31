@@ -13,20 +13,16 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    // Shim `process` for the client bundle. Some auto-generated modules
-    // (e.g. src/integrations/supabase/client.ts) read `process.env.*` at
-    // module scope as an SSR fallback. In the browser `process` is
-    // undefined, which crashes hydrateStart() with
-    // "ReferenceError: process is not defined" on stricter runtimes
-    // (e.g. Chromium on Raspberry Pi). Lovable preview happens to tolerate
-    // it, the Pi does not.
+    // Shim `process.env.NODE_ENV` for the client bundle. Some libraries
+    // (and TanStack Start's hydrateStart) reference it at runtime; on
+    // stricter Chromium builds (e.g. Raspberry Pi) an undefined `process`
+    // global crashes hydration with "ReferenceError: process is not defined".
+    // We only shim NODE_ENV — never the whole `process.env` object —
+    // because the SSR bundle still needs real `process.env.X` access.
     define: {
       "process.env.NODE_ENV": JSON.stringify(
         process.env.NODE_ENV ?? "production",
       ),
-      "process.env.SUPABASE_URL": "undefined",
-      "process.env.SUPABASE_PUBLISHABLE_KEY": "undefined",
-      "process.env": "({})",
     },
   },
 });
