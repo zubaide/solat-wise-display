@@ -12,4 +12,21 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // Shim `process` for the client bundle. Some auto-generated modules
+    // (e.g. src/integrations/supabase/client.ts) read `process.env.*` at
+    // module scope as an SSR fallback. In the browser `process` is
+    // undefined, which crashes hydrateStart() with
+    // "ReferenceError: process is not defined" on stricter runtimes
+    // (e.g. Chromium on Raspberry Pi). Lovable preview happens to tolerate
+    // it, the Pi does not.
+    define: {
+      "process.env.NODE_ENV": JSON.stringify(
+        process.env.NODE_ENV ?? "production",
+      ),
+      "process.env.SUPABASE_URL": "undefined",
+      "process.env.SUPABASE_PUBLISHABLE_KEY": "undefined",
+      "process.env": "({})",
+    },
+  },
 });
