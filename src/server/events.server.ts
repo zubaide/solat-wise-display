@@ -1,18 +1,18 @@
-// Tiny in-process event bus for SSE invalidations.
-type Listener = (event: string) => void;
-const listeners = new Set<Listener>();
+type Listener = (topic: string) => void;
 
-export function subscribe(fn: Listener): () => void {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
+const globalStore = globalThis as unknown as { sseListeners?: Set<Listener> };
+const listeners = globalStore.sseListeners ?? new Set<Listener>();
+globalStore.sseListeners = listeners;
+
+export function subscribe(listener: Listener) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
-export function emit(event: string): void {
-  for (const l of listeners) {
-    try {
-      l(event);
-    } catch {
-      /* ignore */
-    }
+export function broadcast(topic: string) {
+  for (const listener of listeners) {
+    listener(topic);
   }
 }

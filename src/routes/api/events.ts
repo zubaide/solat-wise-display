@@ -1,32 +1,45 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { subscribe } from "@/server/events.server";
+import { subscribe } from "../../server/events.server";
 
 export const Route = createFileRoute("/api/events")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: ({ request }) => {
+        const encoder = new TextEncoder();
+        let stop = () => {};
+
         const stream = new ReadableStream({
           start(controller) {
-            const enc = new TextEncoder();
-            const send = (e: string) => controller.enqueue(enc.encode(`data: ${e}\n\n`));
-            send("hello");
-            const unsub = subscribe((event) => send(event));
-            const ping = setInterval(() => send("ping"), 25_000);
-            (controller as unknown as { _close?: () => void })._close = () => {
-              clearInterval(ping);
-              unsub();
+            const send = (text: string) => {
+              try {
+                controller.enqueue(encoder.encode(text));
+              } catch {
+                stop();
+              }
             };
+
+            const unsubscribe = subscribe((topic) => send(`event: update\ndata: ${topic}\n\n`));
+            const heartbeat = setInterval(() => send(": ping\n\n"), 25000);
+
+            stop = () => {
+              clearInterval(heartbeat);
+              unsubscribe();
+            };
+
+            request.signal.addEventListener("abort", stop);
+            send("retry: 3000\n\n");
           },
           cancel() {
-            // controller cleanup is handled when start's closures go out of scope
+            stop();
           },
         });
+
         return new Response(stream, {
-          status: 200,
           headers: {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache, no-transform",
             Connection: "keep-alive",
+            "X-Accel-Buffering": "no",
           },
         });
       },

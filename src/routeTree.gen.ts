@@ -9,350 +9,54 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ApiEventsRouteImport } from './routes/api/events'
-import { Route as AdminSlideshowRouteImport } from './routes/admin.slideshow'
-import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
-import { Route as ApiUploadsSplatRouteImport } from './routes/api/uploads.$'
-import { Route as ApiDataSlidesRouteImport } from './routes/api/data.slides'
-import { Route as ApiDataSettingsRouteImport } from './routes/api/data.settings'
-import { Route as ApiDataPrayerTimesRouteImport } from './routes/api/data.prayer-times'
-import { Route as ApiDataPrayerLibraryRouteImport } from './routes/api/data.prayer-library'
-import { Route as ApiDataDisplayRouteImport } from './routes/api/data.display'
-import { Route as ApiDataAnnouncementsRouteImport } from './routes/api/data.announcements'
-import { Route as ApiAuthMeRouteImport } from './routes/api/auth.me'
-import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth.logout'
-import { Route as ApiAuthLoginRouteImport } from './routes/api/auth.login'
-import { Route as ApiAuthChangePasswordRouteImport } from './routes/api/auth.change-password'
-import { Route as ApiAdminUploadRouteImport } from './routes/api/admin.upload'
-import { Route as ApiAdminSlidesRouteImport } from './routes/api/admin.slides'
-import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
-import { Route as ApiAdminPrayerTimesRouteImport } from './routes/api/admin.prayer-times'
-import { Route as ApiAdminAnnouncementsRouteImport } from './routes/api/admin.announcements'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRoute,
 } as any)
 const ApiEventsRoute = ApiEventsRouteImport.update({
   id: '/api/events',
   path: '/api/events',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminSlideshowRoute = AdminSlideshowRouteImport.update({
-  id: '/slideshow',
-  path: '/slideshow',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
-  id: '/announcements',
-  path: '/announcements',
-  getParentRoute: () => AdminRoute,
-} as any)
-const ApiUploadsSplatRoute = ApiUploadsSplatRouteImport.update({
-  id: '/api/uploads/$',
-  path: '/api/uploads/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiDataSlidesRoute = ApiDataSlidesRouteImport.update({
-  id: '/api/data/slides',
-  path: '/api/data/slides',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiDataSettingsRoute = ApiDataSettingsRouteImport.update({
-  id: '/api/data/settings',
-  path: '/api/data/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiDataPrayerTimesRoute = ApiDataPrayerTimesRouteImport.update({
-  id: '/api/data/prayer-times',
-  path: '/api/data/prayer-times',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiDataPrayerLibraryRoute = ApiDataPrayerLibraryRouteImport.update({
-  id: '/api/data/prayer-library',
-  path: '/api/data/prayer-library',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiDataDisplayRoute = ApiDataDisplayRouteImport.update({
-  id: '/api/data/display',
-  path: '/api/data/display',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiDataAnnouncementsRoute = ApiDataAnnouncementsRouteImport.update({
-  id: '/api/data/announcements',
-  path: '/api/data/announcements',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
-  id: '/api/auth/me',
-  path: '/api/auth/me',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
-  id: '/api/auth/logout',
-  path: '/api/auth/logout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
-  id: '/api/auth/login',
-  path: '/api/auth/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthChangePasswordRoute = ApiAuthChangePasswordRouteImport.update({
-  id: '/api/auth/change-password',
-  path: '/api/auth/change-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminUploadRoute = ApiAdminUploadRouteImport.update({
-  id: '/api/admin/upload',
-  path: '/api/admin/upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminSlidesRoute = ApiAdminSlidesRouteImport.update({
-  id: '/api/admin/slides',
-  path: '/api/admin/slides',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
-  id: '/api/admin/settings',
-  path: '/api/admin/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminPrayerTimesRoute = ApiAdminPrayerTimesRouteImport.update({
-  id: '/api/admin/prayer-times',
-  path: '/api/admin/prayer-times',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminAnnouncementsRoute = ApiAdminAnnouncementsRouteImport.update({
-  id: '/api/admin/announcements',
-  path: '/api/admin/announcements',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteWithChildren
-  '/login': typeof LoginRoute
-  '/admin/announcements': typeof AdminAnnouncementsRoute
-  '/admin/slideshow': typeof AdminSlideshowRoute
   '/api/events': typeof ApiEventsRoute
-  '/admin/': typeof AdminIndexRoute
-  '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
-  '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
-  '/api/admin/settings': typeof ApiAdminSettingsRoute
-  '/api/admin/slides': typeof ApiAdminSlidesRoute
-  '/api/admin/upload': typeof ApiAdminUploadRoute
-  '/api/auth/change-password': typeof ApiAuthChangePasswordRoute
-  '/api/auth/login': typeof ApiAuthLoginRoute
-  '/api/auth/logout': typeof ApiAuthLogoutRoute
-  '/api/auth/me': typeof ApiAuthMeRoute
-  '/api/data/announcements': typeof ApiDataAnnouncementsRoute
-  '/api/data/display': typeof ApiDataDisplayRoute
-  '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
-  '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
-  '/api/data/settings': typeof ApiDataSettingsRoute
-  '/api/data/slides': typeof ApiDataSlidesRoute
-  '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/admin/announcements': typeof AdminAnnouncementsRoute
-  '/admin/slideshow': typeof AdminSlideshowRoute
   '/api/events': typeof ApiEventsRoute
-  '/admin': typeof AdminIndexRoute
-  '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
-  '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
-  '/api/admin/settings': typeof ApiAdminSettingsRoute
-  '/api/admin/slides': typeof ApiAdminSlidesRoute
-  '/api/admin/upload': typeof ApiAdminUploadRoute
-  '/api/auth/change-password': typeof ApiAuthChangePasswordRoute
-  '/api/auth/login': typeof ApiAuthLoginRoute
-  '/api/auth/logout': typeof ApiAuthLogoutRoute
-  '/api/auth/me': typeof ApiAuthMeRoute
-  '/api/data/announcements': typeof ApiDataAnnouncementsRoute
-  '/api/data/display': typeof ApiDataDisplayRoute
-  '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
-  '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
-  '/api/data/settings': typeof ApiDataSettingsRoute
-  '/api/data/slides': typeof ApiDataSlidesRoute
-  '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteWithChildren
-  '/login': typeof LoginRoute
-  '/admin/announcements': typeof AdminAnnouncementsRoute
-  '/admin/slideshow': typeof AdminSlideshowRoute
   '/api/events': typeof ApiEventsRoute
-  '/admin/': typeof AdminIndexRoute
-  '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
-  '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
-  '/api/admin/settings': typeof ApiAdminSettingsRoute
-  '/api/admin/slides': typeof ApiAdminSlidesRoute
-  '/api/admin/upload': typeof ApiAdminUploadRoute
-  '/api/auth/change-password': typeof ApiAuthChangePasswordRoute
-  '/api/auth/login': typeof ApiAuthLoginRoute
-  '/api/auth/logout': typeof ApiAuthLogoutRoute
-  '/api/auth/me': typeof ApiAuthMeRoute
-  '/api/data/announcements': typeof ApiDataAnnouncementsRoute
-  '/api/data/display': typeof ApiDataDisplayRoute
-  '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
-  '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
-  '/api/data/settings': typeof ApiDataSettingsRoute
-  '/api/data/slides': typeof ApiDataSlidesRoute
-  '/api/uploads/$': typeof ApiUploadsSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/admin'
-    | '/login'
-    | '/admin/announcements'
-    | '/admin/slideshow'
-    | '/api/events'
-    | '/admin/'
-    | '/api/admin/announcements'
-    | '/api/admin/prayer-times'
-    | '/api/admin/settings'
-    | '/api/admin/slides'
-    | '/api/admin/upload'
-    | '/api/auth/change-password'
-    | '/api/auth/login'
-    | '/api/auth/logout'
-    | '/api/auth/me'
-    | '/api/data/announcements'
-    | '/api/data/display'
-    | '/api/data/prayer-library'
-    | '/api/data/prayer-times'
-    | '/api/data/settings'
-    | '/api/data/slides'
-    | '/api/uploads/$'
+  fullPaths: '/' | '/api/events'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/login'
-    | '/admin/announcements'
-    | '/admin/slideshow'
-    | '/api/events'
-    | '/admin'
-    | '/api/admin/announcements'
-    | '/api/admin/prayer-times'
-    | '/api/admin/settings'
-    | '/api/admin/slides'
-    | '/api/admin/upload'
-    | '/api/auth/change-password'
-    | '/api/auth/login'
-    | '/api/auth/logout'
-    | '/api/auth/me'
-    | '/api/data/announcements'
-    | '/api/data/display'
-    | '/api/data/prayer-library'
-    | '/api/data/prayer-times'
-    | '/api/data/settings'
-    | '/api/data/slides'
-    | '/api/uploads/$'
-  id:
-    | '__root__'
-    | '/'
-    | '/admin'
-    | '/login'
-    | '/admin/announcements'
-    | '/admin/slideshow'
-    | '/api/events'
-    | '/admin/'
-    | '/api/admin/announcements'
-    | '/api/admin/prayer-times'
-    | '/api/admin/settings'
-    | '/api/admin/slides'
-    | '/api/admin/upload'
-    | '/api/auth/change-password'
-    | '/api/auth/login'
-    | '/api/auth/logout'
-    | '/api/auth/me'
-    | '/api/data/announcements'
-    | '/api/data/display'
-    | '/api/data/prayer-library'
-    | '/api/data/prayer-times'
-    | '/api/data/settings'
-    | '/api/data/slides'
-    | '/api/uploads/$'
+  to: '/' | '/api/events'
+  id: '__root__' | '/' | '/api/events'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRouteWithChildren
-  LoginRoute: typeof LoginRoute
   ApiEventsRoute: typeof ApiEventsRoute
-  ApiAdminAnnouncementsRoute: typeof ApiAdminAnnouncementsRoute
-  ApiAdminPrayerTimesRoute: typeof ApiAdminPrayerTimesRoute
-  ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
-  ApiAdminSlidesRoute: typeof ApiAdminSlidesRoute
-  ApiAdminUploadRoute: typeof ApiAdminUploadRoute
-  ApiAuthChangePasswordRoute: typeof ApiAuthChangePasswordRoute
-  ApiAuthLoginRoute: typeof ApiAuthLoginRoute
-  ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
-  ApiAuthMeRoute: typeof ApiAuthMeRoute
-  ApiDataAnnouncementsRoute: typeof ApiDataAnnouncementsRoute
-  ApiDataDisplayRoute: typeof ApiDataDisplayRoute
-  ApiDataPrayerLibraryRoute: typeof ApiDataPrayerLibraryRoute
-  ApiDataPrayerTimesRoute: typeof ApiDataPrayerTimesRoute
-  ApiDataSettingsRoute: typeof ApiDataSettingsRoute
-  ApiDataSlidesRoute: typeof ApiDataSlidesRoute
-  ApiUploadsSplatRoute: typeof ApiUploadsSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
     }
     '/api/events': {
       id: '/api/events'
@@ -361,171 +65,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/slideshow': {
-      id: '/admin/slideshow'
-      path: '/slideshow'
-      fullPath: '/admin/slideshow'
-      preLoaderRoute: typeof AdminSlideshowRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/announcements': {
-      id: '/admin/announcements'
-      path: '/announcements'
-      fullPath: '/admin/announcements'
-      preLoaderRoute: typeof AdminAnnouncementsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/api/uploads/$': {
-      id: '/api/uploads/$'
-      path: '/api/uploads/$'
-      fullPath: '/api/uploads/$'
-      preLoaderRoute: typeof ApiUploadsSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/data/slides': {
-      id: '/api/data/slides'
-      path: '/api/data/slides'
-      fullPath: '/api/data/slides'
-      preLoaderRoute: typeof ApiDataSlidesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/data/settings': {
-      id: '/api/data/settings'
-      path: '/api/data/settings'
-      fullPath: '/api/data/settings'
-      preLoaderRoute: typeof ApiDataSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/data/prayer-times': {
-      id: '/api/data/prayer-times'
-      path: '/api/data/prayer-times'
-      fullPath: '/api/data/prayer-times'
-      preLoaderRoute: typeof ApiDataPrayerTimesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/data/prayer-library': {
-      id: '/api/data/prayer-library'
-      path: '/api/data/prayer-library'
-      fullPath: '/api/data/prayer-library'
-      preLoaderRoute: typeof ApiDataPrayerLibraryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/data/display': {
-      id: '/api/data/display'
-      path: '/api/data/display'
-      fullPath: '/api/data/display'
-      preLoaderRoute: typeof ApiDataDisplayRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/data/announcements': {
-      id: '/api/data/announcements'
-      path: '/api/data/announcements'
-      fullPath: '/api/data/announcements'
-      preLoaderRoute: typeof ApiDataAnnouncementsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/me': {
-      id: '/api/auth/me'
-      path: '/api/auth/me'
-      fullPath: '/api/auth/me'
-      preLoaderRoute: typeof ApiAuthMeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/logout': {
-      id: '/api/auth/logout'
-      path: '/api/auth/logout'
-      fullPath: '/api/auth/logout'
-      preLoaderRoute: typeof ApiAuthLogoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/login': {
-      id: '/api/auth/login'
-      path: '/api/auth/login'
-      fullPath: '/api/auth/login'
-      preLoaderRoute: typeof ApiAuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/change-password': {
-      id: '/api/auth/change-password'
-      path: '/api/auth/change-password'
-      fullPath: '/api/auth/change-password'
-      preLoaderRoute: typeof ApiAuthChangePasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/upload': {
-      id: '/api/admin/upload'
-      path: '/api/admin/upload'
-      fullPath: '/api/admin/upload'
-      preLoaderRoute: typeof ApiAdminUploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/slides': {
-      id: '/api/admin/slides'
-      path: '/api/admin/slides'
-      fullPath: '/api/admin/slides'
-      preLoaderRoute: typeof ApiAdminSlidesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/settings': {
-      id: '/api/admin/settings'
-      path: '/api/admin/settings'
-      fullPath: '/api/admin/settings'
-      preLoaderRoute: typeof ApiAdminSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/prayer-times': {
-      id: '/api/admin/prayer-times'
-      path: '/api/admin/prayer-times'
-      fullPath: '/api/admin/prayer-times'
-      preLoaderRoute: typeof ApiAdminPrayerTimesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/announcements': {
-      id: '/api/admin/announcements'
-      path: '/api/admin/announcements'
-      fullPath: '/api/admin/announcements'
-      preLoaderRoute: typeof ApiAdminAnnouncementsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
-interface AdminRouteChildren {
-  AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
-  AdminSlideshowRoute: typeof AdminSlideshowRoute
-  AdminIndexRoute: typeof AdminIndexRoute
-}
-
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminAnnouncementsRoute: AdminAnnouncementsRoute,
-  AdminSlideshowRoute: AdminSlideshowRoute,
-  AdminIndexRoute: AdminIndexRoute,
-}
-
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRouteWithChildren,
-  LoginRoute: LoginRoute,
   ApiEventsRoute: ApiEventsRoute,
-  ApiAdminAnnouncementsRoute: ApiAdminAnnouncementsRoute,
-  ApiAdminPrayerTimesRoute: ApiAdminPrayerTimesRoute,
-  ApiAdminSettingsRoute: ApiAdminSettingsRoute,
-  ApiAdminSlidesRoute: ApiAdminSlidesRoute,
-  ApiAdminUploadRoute: ApiAdminUploadRoute,
-  ApiAuthChangePasswordRoute: ApiAuthChangePasswordRoute,
-  ApiAuthLoginRoute: ApiAuthLoginRoute,
-  ApiAuthLogoutRoute: ApiAuthLogoutRoute,
-  ApiAuthMeRoute: ApiAuthMeRoute,
-  ApiDataAnnouncementsRoute: ApiDataAnnouncementsRoute,
-  ApiDataDisplayRoute: ApiDataDisplayRoute,
-  ApiDataPrayerLibraryRoute: ApiDataPrayerLibraryRoute,
-  ApiDataPrayerTimesRoute: ApiDataPrayerTimesRoute,
-  ApiDataSettingsRoute: ApiDataSettingsRoute,
-  ApiDataSlidesRoute: ApiDataSlidesRoute,
-  ApiUploadsSplatRoute: ApiUploadsSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

@@ -1,0 +1,9 @@
+node_modules
+.git
+data
+dist
+.env
+*.log
+.DS_Store
+docs
+supabase

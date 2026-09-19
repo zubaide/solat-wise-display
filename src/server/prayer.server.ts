@@ -1,37 +1,28 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
-import { PRAYER_DIR } from "./db.server";
+import fs from "node:fs";
+import path from "node:path";
+import { toDateKey, type DayTimes } from "../lib/prayer-utils";
 
-export interface PrayerTimesPayload {
-  zone: string;
-  date: string;
-  hijri: string;
-  day: string;
-  imsak: string;
-  subuh: string;
-  syuruk: string;
-  zohor: string;
-  asar: string;
-  maghrib: string;
-  isyak: string;
-  source: "local" | "fallback";
-}
+const prayerDir = path.resolve(process.cwd(), "data", "prayer-times");
+const RETRY_AFTER_MS = 5 * 60 * 1000;
 
-const FALLBACK = {
-  imsak: "05:48:00",
-  subuh: "05:58:00",
-  syuruk: "07:10:00",
-  zohor: "13:15:00",
-  asar: "16:39:00",
-  maghrib: "19:21:00",
-  isyak: "20:32:00",
+const MONTHS: Record<string, string> = {
+  Jan: "01",
+  Feb: "02",
+  Mar: "03",
+  Apr: "04",
+  May: "05",
+  Jun: "06",
+  Jul: "07",
+  Aug: "08",
+  Sep: "09",
+  Oct: "10",
+  Nov: "11",
+  Dec: "12",
 };
 
-interface YearRow {
+interface JakimDay {
   hijri: string;
   date: string;
-  day: string;
-  imsak: string;
   fajr: string;
   syuruk: string;
   dhuhr: string;
@@ -40,88 +31,101 @@ interface YearRow {
   isha: string;
 }
 
-const yearCache = new Map<string, YearRow[]>();
+const cache = new Map<string, DayTimes[]>();
+const lastFailure = new Map<string, number>();
 
-function malaysiaToday(): string {
-  const fmt = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Kuala_Lumpur",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  return fmt.format(new Date());
+function filePath(zone: string, year: number) {
+  return path.join(prayerDir, `${zone}-${year}.json`);
 }
 
-function loadYear(zone: string, year: number): YearRow[] | null {
-  const key = `${zone}-${year}`;
-  if (yearCache.has(key)) return yearCache.get(key)!;
-  const path = join(PRAYER_DIR, `${key}.json`);
-  if (!existsSync(path)) return null;
-  const raw = JSON.parse(readFileSync(path, "utf8"));
-  const rows = (Array.isArray(raw) ? raw : raw.prayerTime) as YearRow[];
-  yearCache.set(key, rows);
-  return rows;
+function convertDate(value: string) {
+  const [day, month, year] = value.split("-");
+  return `${year}-${MONTHS[month]}-${day.padStart(2, "0")}`;
 }
 
-function normaliseDate(raw: string, year: number): string {
-  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
-  const months: Record<string, string> = {
-    Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
-    Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12",
+function convertDay(day: JakimDay): DayTimes {
+  return {
+    date: convertDate(day.date),
+    hijri: day.hijri,
+    subuh: day.fajr.slice(0, 5),
+    syuruk: day.syuruk.slice(0, 5),
+    zohor: day.dhuhr.slice(0, 5),
+    asar: day.asr.slice(0, 5),
+    maghrib: day.maghrib.slice(0, 5),
+    isyak: day.isha.slice(0, 5),
   };
-  const m = /^(\d{1,2})-(\w{3})-(\d{4})$/.exec(raw);
-  if (m) {
-    const [, d, mon, y] = m;
-    return `${y}-${months[mon] ?? "01"}-${d.padStart(2, "0")}`;
-  }
-  return `${year}-01-01`;
 }
 
-export function getPrayerTimesForZone(zoneInput: string): PrayerTimesPayload {
-  const zone = zoneInput.toUpperCase();
-  const today = malaysiaToday();
-  const year = Number(today.slice(0, 4));
-  const rows = loadYear(zone, year);
-  if (rows) {
-    const row = rows.find((r) => normaliseDate(r.date, year) === today);
-    if (row) {
-      return {
-        zone,
-        date: today,
-        hijri: row.hijri,
-        day: row.day,
-        imsak: row.imsak,
-        subuh: row.fajr,
-        syuruk: row.syuruk,
-        zohor: row.dhuhr,
-        asar: row.asr,
-        maghrib: row.maghrib,
-        isyak: row.isha,
-        source: "local",
-      };
+function readFile(zone: string, year: number): DayTimes[] | null {
+  try {
+    return JSON.parse(fs.readFileSync(filePath(zone, year), "utf8")) as DayTimes[];
+  } catch {
+    return null;
+  }
+}
+
+async function downloadYear(zone: string, year: number): Promise<DayTimes[]> {
+  const url = `https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=year&zone=${zone}`;
+  const response = await fetch(url, { signal: AbortSignal.timeout(20000) });
+  if (!response.ok) {
+    throw new Error(`JAKIM responded with ${response.status}`);
+  }
+
+  const body = (await response.json()) as { prayerTime?: JakimDay[] };
+  const days = (body.prayerTime ?? []).map(convertDay);
+  if (days.length < 365 || !days[0].date.startsWith(String(year))) {
+    throw new Error(`JAKIM returned no full-year data for ${zone} ${year}`);
+  }
+
+  fs.mkdirSync(prayerDir, { recursive: true });
+  const tempPath = `${filePath(zone, year)}.tmp`;
+  fs.writeFileSync(tempPath, JSON.stringify(days));
+  fs.renameSync(tempPath, filePath(zone, year));
+  return days;
+}
+
+async function loadYear(zone: string, year: number): Promise<DayTimes[]> {
+  if (!/^[A-Z]{3}\d{2}$/.test(zone)) {
+    return [];
+  }
+
+  const key = `${zone}-${year}`;
+  const cached = cache.get(key);
+  if (cached) {
+    return cached;
+  }
+
+  let days = readFile(zone, year);
+  if (!days) {
+    const failedAt = lastFailure.get(key);
+    if (failedAt && Date.now() - failedAt < RETRY_AFTER_MS) {
+      return [];
     }
-  }
-  return { zone, date: today, hijri: "", day: "", ...FALLBACK, source: "fallback" };
-}
-
-export interface PrayerLibraryEntry {
-  zone: string;
-  year: number;
-  days: number;
-}
-
-export function listPrayerLibraryFiles(): PrayerLibraryEntry[] {
-  const out: PrayerLibraryEntry[] = [];
-  for (const file of readdirSync(PRAYER_DIR)) {
-    const m = /^([A-Z0-9]+)-(\d{4})\.json$/.exec(file);
-    if (!m) continue;
     try {
-      const raw = JSON.parse(readFileSync(join(PRAYER_DIR, file), "utf8"));
-      const rows = Array.isArray(raw) ? raw : raw.prayerTime;
-      out.push({ zone: m[1], year: Number(m[2]), days: rows?.length ?? 0 });
-    } catch {
-      /* ignore */
+      days = await downloadYear(zone, year);
+    } catch (error) {
+      lastFailure.set(key, Date.now());
+      console.error("Prayer time download failed:", error);
+      return [];
     }
   }
-  return out.sort((a, b) => a.zone.localeCompare(b.zone) || a.year - b.year);
+
+  cache.set(key, days);
+  return days;
+}
+
+export async function getDayTimes(zone: string, date: Date): Promise<DayTimes | null> {
+  const days = await loadYear(zone, date.getFullYear());
+  const key = toDateKey(date);
+  return days.find((day) => day.date === key) ?? null;
+}
+
+export async function getTodayAndTomorrow(zone: string, now: Date = new Date()) {
+  const tomorrowDate = new Date(now);
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const [today, tomorrow] = await Promise.all([
+    getDayTimes(zone, now),
+    getDayTimes(zone, tomorrowDate),
+  ]);
+  return { today, tomorrow };
 }
