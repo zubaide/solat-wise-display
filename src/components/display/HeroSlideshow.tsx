@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SlideshowImage } from "@/lib/display-data";
 
 const FALLBACK =
@@ -7,9 +7,13 @@ const FALLBACK =
 export function HeroSlideshow({
   slides,
   onSlideChange,
+  onCycleComplete,
+  paused,
 }: {
   slides: SlideshowImage[];
   onSlideChange?: (slide: SlideshowImage | null) => void;
+  onCycleComplete?: () => void;
+  paused?: boolean;
 }) {
   const [idx, setIdx] = useState(0);
   const count = slides.length;
@@ -17,11 +21,19 @@ export function HeroSlideshow({
   const slide = slides[safeIdx];
   const intervalMs = Math.max(2, slide?.interval_seconds ?? 8) * 1000;
 
+  const onCycleCompleteRef = useRef(onCycleComplete);
+  onCycleCompleteRef.current = onCycleComplete;
+
   useEffect(() => {
-    if (count <= 1) return;
-    const id = setTimeout(() => setIdx((i) => (i + 1) % count), intervalMs);
+    if (paused) return;
+    const cycleLen = Math.max(1, count);
+    const id = setTimeout(() => {
+      const newIdx = idx + 1;
+      setIdx(newIdx);
+      if (newIdx % cycleLen === 0) onCycleCompleteRef.current?.();
+    }, intervalMs);
     return () => clearTimeout(id);
-  }, [count, intervalMs, safeIdx]);
+  }, [idx, intervalMs, paused, count]);
 
   useEffect(() => {
     onSlideChange?.(slide ?? null);

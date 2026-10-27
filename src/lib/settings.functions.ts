@@ -1,10 +1,8 @@
-// Thin client-side fetch wrappers. All real logic lives in server routes
-// under src/routes/api/. No imports from @/server/* are allowed here because
-// this module is reachable from client code via @/lib/display-data.
-
 export interface SettingsRow {
   id: string;
   mosque_name: string;
+  mosque_address: string;
+  logo_url: string;
   zone: string;
   iqamah_subuh: number;
   iqamah_zohor: number;
@@ -14,10 +12,17 @@ export interface SettingsRow {
   ticker_speed: number;
   donation_goal: number;
   donation_current: number;
+  clock_face: string;
+  blackout_seconds: number;
+  alert_email: string;
+  islamic_event_interval_minutes: number;
+  islamic_event_duration_seconds: number;
 }
 
 export interface SettingsUpdate {
   mosque_name: string;
+  mosque_address: string;
+  logo_url: string;
   zone: string;
   iqamah_subuh: number;
   iqamah_zohor: number;
@@ -27,6 +32,11 @@ export interface SettingsUpdate {
   ticker_speed: number;
   donation_goal: number;
   donation_current: number;
+  clock_face: string;
+  blackout_seconds: number;
+  alert_email: string;
+  islamic_event_interval_minutes: number;
+  islamic_event_duration_seconds: number;
 }
 
 async function jsonOrThrow(res: Response) {

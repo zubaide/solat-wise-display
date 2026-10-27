@@ -10,14 +10,11 @@ export const PRAYER_LABELS = [
 
 export type PrayerKey = (typeof PRAYER_LABELS)[number]["key"];
 
-// Prayers that count as "active" prayers (exclude Imsak/Syuruk for highlighting next prayer)
 export const ACTIVE_PRAYERS: PrayerKey[] = ["subuh", "zohor", "asar", "maghrib", "isyak"];
 
 export function parseTimeToToday(hms: string): Date {
-  // hms is "HH:MM:SS" in Asia/Kuala_Lumpur. Build a Date that represents that wall clock in KL.
   const [h, m, s] = hms.split(":").map((v) => parseInt(v, 10));
   const now = new Date();
-  // Get the KL date parts
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Kuala_Lumpur",
     year: "numeric",
@@ -27,7 +24,6 @@ export function parseTimeToToday(hms: string): Date {
   const y = parts.find((p) => p.type === "year")!.value;
   const mo = parts.find((p) => p.type === "month")!.value;
   const d = parts.find((p) => p.type === "day")!.value;
-  // Construct ISO in +08:00
   const iso = `${y}-${mo}-${d}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s ?? 0).padStart(2, "0")}+08:00`;
   return new Date(iso);
 }
@@ -64,10 +60,13 @@ export function getCurrentAndNext(times: PrayerSchedule, now: Date) {
   for (let i = 0; i < list.length; i++) {
     if (now >= list[i].at) current = list[i].key;
   }
+  if (current === "subuh") {
+    const syurukAt = parseTimeToToday(times.syuruk);
+    if (now >= syurukAt) current = null;
+  }
   for (const item of list) {
     if (item.at > now) { next = item; break; }
   }
-  // If past Isyak, next is tomorrow's Subuh (use same time + 1 day)
   if (!next) {
     const tomorrow = new Date(list[0].at.getTime() + 24 * 3600 * 1000);
     next = { key: "subuh", at: tomorrow };
@@ -75,23 +74,46 @@ export function getCurrentAndNext(times: PrayerSchedule, now: Date) {
   return { current, next };
 }
 
+const BULAN_HIJRI = [
+  "Muharram", "Safar", "Rabiulawal", "Rabiulakhir",
+  "Jamadilawal", "Jamadilakhir", "Rejab", "Syaaban",
+  "Ramadan", "Syawal", "Zulkaedah", "Zulhijjah",
+];
+
+const HARI_MELAYU = ["Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"];
+
+const BULAN_MASIHI = [
+  "Januari", "Februari", "Mac", "April", "Mei", "Jun",
+  "Julai", "Ogos", "September", "Oktober", "November", "Disember",
+];
+
 export function hijriToday(): string {
   try {
     const fmt = new Intl.DateTimeFormat("en-TN-u-ca-islamic-umalqura", {
-      day: "numeric", month: "long", year: "numeric",
+      day: "numeric", month: "numeric", year: "numeric",
       timeZone: "Asia/Kuala_Lumpur",
     });
-    return fmt.format(new Date()).replace(" AH", " H");
+    const parts = fmt.formatToParts(new Date());
+    const day = parts.find((p) => p.type === "day")?.value ?? "";
+    const month = Number(parts.find((p) => p.type === "month")?.value ?? "1");
+    const year = parts.find((p) => p.type === "year")?.value ?? "";
+    return `${day} ${BULAN_HIJRI[month - 1]} ${year} H`;
   } catch {
     return "";
   }
 }
 
 export function masihiToday(): string {
-  return new Intl.DateTimeFormat("en-MY", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Kuala_Lumpur",
-  }).format(new Date());
+    year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(now);
+  const day = Number(parts.find((p) => p.type === "day")?.value ?? "1");
+  const month = Number(parts.find((p) => p.type === "month")?.value ?? "1");
+  const year = parts.find((p) => p.type === "year")?.value ?? "";
+  const hari = HARI_MELAYU[now.getDay()];
+  return `${hari}, ${day} ${BULAN_MASIHI[month - 1]} ${year}`;
 }
 
 // Most-used JAKIM zones (subset for the dropdown)

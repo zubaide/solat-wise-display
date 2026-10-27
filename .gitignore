@@ -30,3 +30,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+data/mosque.db*
+data/uploads/
+dist/
+node_modules/

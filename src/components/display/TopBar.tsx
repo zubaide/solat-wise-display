@@ -5,11 +5,12 @@ import { PRAYER_LABELS, formatHMS, hijriToday, masihiToday, type PrayerKey } fro
 interface Props {
   mosqueName: string;
   mosqueAddress?: string;
+  logoUrl?: string;
   nextKey: PrayerKey;
   nextAt: Date;
 }
 
-export function TopBar({ mosqueName, mosqueAddress, nextKey, nextAt }: Props) {
+export function TopBar({ mosqueName, mosqueAddress, logoUrl, nextKey, nextAt }: Props) {
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -24,15 +25,13 @@ export function TopBar({ mosqueName, mosqueAddress, nextKey, nextAt }: Props) {
 
   return (
     <header className="flex items-stretch justify-between gap-6 px-6 pt-4">
-      {/* Left card — mosque identity */}
       <div className="flex flex-1 items-center gap-4 rounded-2xl bg-gradient-to-r from-primary/90 to-primary/60 px-6 py-4 shadow-elegant ring-1 ring-gold/40">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-background/90 text-3xl text-gold shadow-gold">
-          ☪
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-background/90 text-3xl text-gold shadow-gold">
+          {logoUrl ? <img src={logoUrl} alt="" className="h-full w-full object-cover" /> : "☪"}
         </div>
         <div className="min-w-0">
-          <h1 className="truncate font-display text-3xl font-extrabold tracking-tight">
-            <span className="text-gold">Masjid</span>{" "}
-            <span className="text-primary-foreground">{mosqueName.replace(/^Masjid\s*/i, "")}</span>
+          <h1 className="truncate font-display text-3xl font-extrabold tracking-tight text-primary-foreground">
+            {mosqueName}
           </h1>
           {mosqueAddress && (
             <p className="truncate text-sm text-primary-foreground/80">{mosqueAddress}</p>
@@ -40,7 +39,6 @@ export function TopBar({ mosqueName, mosqueAddress, nextKey, nextAt }: Props) {
         </div>
       </div>
 
-      {/* Right — dates + countdown */}
       <div className="flex flex-col items-end justify-between gap-2">
         <div className="flex items-center gap-2 text-right">
           <span className="h-2 w-2 rounded-full bg-emerald" />

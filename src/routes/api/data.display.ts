@@ -8,7 +8,7 @@ export const Route = createFileRoute("/api/data/display")({
       GET: async ({ request }) => {
         const url = new URL(request.url);
         const settings = db().prepare("SELECT * FROM mosque_settings LIMIT 1").get() as SettingsRow;
-        const zone = (url.searchParams.get("zone") ?? settings.zone ?? "SGR02").toUpperCase();
+        const zone = (url.searchParams.get("zone") ?? settings.zone ?? "SGR01").toUpperCase();
         const announcements = (
           db()
             .prepare("SELECT * FROM announcements WHERE is_active = 1 ORDER BY display_order")

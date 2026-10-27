@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ApiEventsRouteImport } from './routes/api/events'
+import { Route as AdminTakwimRouteImport } from './routes/admin.takwim'
 import { Route as AdminSlideshowRouteImport } from './routes/admin.slideshow'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as ApiUploadsSplatRouteImport } from './routes/api/uploads.$'
@@ -21,6 +22,7 @@ import { Route as ApiDataSlidesRouteImport } from './routes/api/data.slides'
 import { Route as ApiDataSettingsRouteImport } from './routes/api/data.settings'
 import { Route as ApiDataPrayerTimesRouteImport } from './routes/api/data.prayer-times'
 import { Route as ApiDataPrayerLibraryRouteImport } from './routes/api/data.prayer-library'
+import { Route as ApiDataIslamicEventsRouteImport } from './routes/api/data.islamic-events'
 import { Route as ApiDataDisplayRouteImport } from './routes/api/data.display'
 import { Route as ApiDataAnnouncementsRouteImport } from './routes/api/data.announcements'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth.me'
@@ -31,6 +33,7 @@ import { Route as ApiAdminUploadRouteImport } from './routes/api/admin.upload'
 import { Route as ApiAdminSlidesRouteImport } from './routes/api/admin.slides'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminPrayerTimesRouteImport } from './routes/api/admin.prayer-times'
+import { Route as ApiAdminIslamicEventsRouteImport } from './routes/api/admin.islamic-events'
 import { Route as ApiAdminAnnouncementsRouteImport } from './routes/api/admin.announcements'
 
 const LoginRoute = LoginRouteImport.update({
@@ -57,6 +60,11 @@ const ApiEventsRoute = ApiEventsRouteImport.update({
   id: '/api/events',
   path: '/api/events',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTakwimRoute = AdminTakwimRouteImport.update({
+  id: '/takwim',
+  path: '/takwim',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminSlideshowRoute = AdminSlideshowRouteImport.update({
   id: '/slideshow',
@@ -91,6 +99,11 @@ const ApiDataPrayerTimesRoute = ApiDataPrayerTimesRouteImport.update({
 const ApiDataPrayerLibraryRoute = ApiDataPrayerLibraryRouteImport.update({
   id: '/api/data/prayer-library',
   path: '/api/data/prayer-library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataIslamicEventsRoute = ApiDataIslamicEventsRouteImport.update({
+  id: '/api/data/islamic-events',
+  path: '/api/data/islamic-events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiDataDisplayRoute = ApiDataDisplayRouteImport.update({
@@ -143,6 +156,11 @@ const ApiAdminPrayerTimesRoute = ApiAdminPrayerTimesRouteImport.update({
   path: '/api/admin/prayer-times',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminIslamicEventsRoute = ApiAdminIslamicEventsRouteImport.update({
+  id: '/api/admin/islamic-events',
+  path: '/api/admin/islamic-events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminAnnouncementsRoute = ApiAdminAnnouncementsRouteImport.update({
   id: '/api/admin/announcements',
   path: '/api/admin/announcements',
@@ -155,9 +173,11 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
+  '/admin/takwim': typeof AdminTakwimRoute
   '/api/events': typeof ApiEventsRoute
   '/admin/': typeof AdminIndexRoute
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
+  '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/slides': typeof ApiAdminSlidesRoute
@@ -168,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/data/announcements': typeof ApiDataAnnouncementsRoute
   '/api/data/display': typeof ApiDataDisplayRoute
+  '/api/data/islamic-events': typeof ApiDataIslamicEventsRoute
   '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
   '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
   '/api/data/settings': typeof ApiDataSettingsRoute
@@ -179,9 +200,11 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
+  '/admin/takwim': typeof AdminTakwimRoute
   '/api/events': typeof ApiEventsRoute
   '/admin': typeof AdminIndexRoute
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
+  '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/slides': typeof ApiAdminSlidesRoute
@@ -192,6 +215,7 @@ export interface FileRoutesByTo {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/data/announcements': typeof ApiDataAnnouncementsRoute
   '/api/data/display': typeof ApiDataDisplayRoute
+  '/api/data/islamic-events': typeof ApiDataIslamicEventsRoute
   '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
   '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
   '/api/data/settings': typeof ApiDataSettingsRoute
@@ -205,9 +229,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
+  '/admin/takwim': typeof AdminTakwimRoute
   '/api/events': typeof ApiEventsRoute
   '/admin/': typeof AdminIndexRoute
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
+  '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/slides': typeof ApiAdminSlidesRoute
@@ -218,6 +244,7 @@ export interface FileRoutesById {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/data/announcements': typeof ApiDataAnnouncementsRoute
   '/api/data/display': typeof ApiDataDisplayRoute
+  '/api/data/islamic-events': typeof ApiDataIslamicEventsRoute
   '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
   '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
   '/api/data/settings': typeof ApiDataSettingsRoute
@@ -232,9 +259,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/admin/announcements'
     | '/admin/slideshow'
+    | '/admin/takwim'
     | '/api/events'
     | '/admin/'
     | '/api/admin/announcements'
+    | '/api/admin/islamic-events'
     | '/api/admin/prayer-times'
     | '/api/admin/settings'
     | '/api/admin/slides'
@@ -245,6 +274,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/data/announcements'
     | '/api/data/display'
+    | '/api/data/islamic-events'
     | '/api/data/prayer-library'
     | '/api/data/prayer-times'
     | '/api/data/settings'
@@ -256,9 +286,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/admin/announcements'
     | '/admin/slideshow'
+    | '/admin/takwim'
     | '/api/events'
     | '/admin'
     | '/api/admin/announcements'
+    | '/api/admin/islamic-events'
     | '/api/admin/prayer-times'
     | '/api/admin/settings'
     | '/api/admin/slides'
@@ -269,6 +301,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/data/announcements'
     | '/api/data/display'
+    | '/api/data/islamic-events'
     | '/api/data/prayer-library'
     | '/api/data/prayer-times'
     | '/api/data/settings'
@@ -281,9 +314,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/admin/announcements'
     | '/admin/slideshow'
+    | '/admin/takwim'
     | '/api/events'
     | '/admin/'
     | '/api/admin/announcements'
+    | '/api/admin/islamic-events'
     | '/api/admin/prayer-times'
     | '/api/admin/settings'
     | '/api/admin/slides'
@@ -294,6 +329,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/data/announcements'
     | '/api/data/display'
+    | '/api/data/islamic-events'
     | '/api/data/prayer-library'
     | '/api/data/prayer-times'
     | '/api/data/settings'
@@ -307,6 +343,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ApiEventsRoute: typeof ApiEventsRoute
   ApiAdminAnnouncementsRoute: typeof ApiAdminAnnouncementsRoute
+  ApiAdminIslamicEventsRoute: typeof ApiAdminIslamicEventsRoute
   ApiAdminPrayerTimesRoute: typeof ApiAdminPrayerTimesRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminSlidesRoute: typeof ApiAdminSlidesRoute
@@ -317,6 +354,7 @@ export interface RootRouteChildren {
   ApiAuthMeRoute: typeof ApiAuthMeRoute
   ApiDataAnnouncementsRoute: typeof ApiDataAnnouncementsRoute
   ApiDataDisplayRoute: typeof ApiDataDisplayRoute
+  ApiDataIslamicEventsRoute: typeof ApiDataIslamicEventsRoute
   ApiDataPrayerLibraryRoute: typeof ApiDataPrayerLibraryRoute
   ApiDataPrayerTimesRoute: typeof ApiDataPrayerTimesRoute
   ApiDataSettingsRoute: typeof ApiDataSettingsRoute
@@ -360,6 +398,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/events'
       preLoaderRoute: typeof ApiEventsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/takwim': {
+      id: '/admin/takwim'
+      path: '/takwim'
+      fullPath: '/admin/takwim'
+      preLoaderRoute: typeof AdminTakwimRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/slideshow': {
       id: '/admin/slideshow'
@@ -408,6 +453,13 @@ declare module '@tanstack/react-router' {
       path: '/api/data/prayer-library'
       fullPath: '/api/data/prayer-library'
       preLoaderRoute: typeof ApiDataPrayerLibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/islamic-events': {
+      id: '/api/data/islamic-events'
+      path: '/api/data/islamic-events'
+      fullPath: '/api/data/islamic-events'
+      preLoaderRoute: typeof ApiDataIslamicEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/data/display': {
@@ -480,6 +532,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminPrayerTimesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/islamic-events': {
+      id: '/api/admin/islamic-events'
+      path: '/api/admin/islamic-events'
+      fullPath: '/api/admin/islamic-events'
+      preLoaderRoute: typeof ApiAdminIslamicEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/announcements': {
       id: '/api/admin/announcements'
       path: '/api/admin/announcements'
@@ -493,12 +552,14 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminSlideshowRoute: typeof AdminSlideshowRoute
+  AdminTakwimRoute: typeof AdminTakwimRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminSlideshowRoute: AdminSlideshowRoute,
+  AdminTakwimRoute: AdminTakwimRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -510,6 +571,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ApiEventsRoute: ApiEventsRoute,
   ApiAdminAnnouncementsRoute: ApiAdminAnnouncementsRoute,
+  ApiAdminIslamicEventsRoute: ApiAdminIslamicEventsRoute,
   ApiAdminPrayerTimesRoute: ApiAdminPrayerTimesRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminSlidesRoute: ApiAdminSlidesRoute,
@@ -520,6 +582,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthMeRoute: ApiAuthMeRoute,
   ApiDataAnnouncementsRoute: ApiDataAnnouncementsRoute,
   ApiDataDisplayRoute: ApiDataDisplayRoute,
+  ApiDataIslamicEventsRoute: ApiDataIslamicEventsRoute,
   ApiDataPrayerLibraryRoute: ApiDataPrayerLibraryRoute,
   ApiDataPrayerTimesRoute: ApiDataPrayerTimesRoute,
   ApiDataSettingsRoute: ApiDataSettingsRoute,
@@ -529,3 +592,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

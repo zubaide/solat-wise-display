@@ -1,8 +1,8 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Megaphone, Images } from "lucide-react";
+import { LogOut, Settings, Megaphone, Images, Calendar } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -17,25 +17,39 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const { isAdmin, loading, signOut } = useAuth();
+  const { isAdmin, loading, refresh, signOut } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const refreshed = useRef(false);
 
   useEffect(() => {
-    if (!loading && !isAdmin) {
+    if (!refreshed.current) {
+      refreshed.current = true;
+      void refresh();
+    }
+  }, [refresh]);
+
+  useEffect(() => {
+    if (!loading && !isAdmin && refreshed.current) {
       navigate({ to: "/login" });
     }
   }, [loading, isAdmin, navigate]);
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Memuatkan...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
+        Mengesahkan sesi...
+      </div>
+    );
   }
+
   if (!isAdmin) return null;
 
   const navItems = [
     { to: "/admin", label: "Tetapan", icon: Settings, exact: true },
     { to: "/admin/announcements", label: "Pengumuman", icon: Megaphone },
     { to: "/admin/slideshow", label: "Slaid", icon: Images },
+    { to: "/admin/takwim", label: "Takwim Islam", icon: Calendar },
   ];
 
   return (
@@ -56,7 +70,6 @@ function AdminLayout() {
           </div>
         </div>
       </header>
-
       <div className="mx-auto flex max-w-6xl gap-6 p-6">
         <nav className="w-56 shrink-0 space-y-1">
           {navItems.map((item) => {
@@ -76,7 +89,6 @@ function AdminLayout() {
             );
           })}
         </nav>
-
         <main className="flex-1 rounded-2xl border border-gold/20 bg-surface-1/80 p-6">
           <Outlet />
         </main>

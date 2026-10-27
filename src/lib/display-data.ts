@@ -1,17 +1,15 @@
-// Client-only display data hooks. Fetches the combined /api/data/display
-// endpoint for the TV display, and individual endpoints for admin lists.
-// Absolutely no imports from @/server/* — this module is bundled to the client.
-
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { listAnnouncements, type AnnouncementRow } from "@/lib/announcements.functions";
 import { listSlides, type SlideRow } from "@/lib/slideshow.functions";
+import { listIslamicEvents, listIslamicEventsAdmin, type IslamicEventRow } from "@/lib/islamic-events.functions";
 import type { SettingsRow } from "@/lib/settings.functions";
 import type { PrayerTimesPayload } from "@/lib/prayer.functions";
 
 export type MosqueSettings = SettingsRow;
 export type Announcement = AnnouncementRow;
 export type SlideshowImage = SlideRow;
+export type { IslamicEventRow };
 
 export interface DisplayPayload {
   settings: SettingsRow;
@@ -27,7 +25,6 @@ async function fetchDisplay(zone?: string): Promise<DisplayPayload> {
   return r.json();
 }
 
-/** Combined display payload for the TV screen. Re-fetches periodically. */
 export function useDisplay(zone?: string) {
   return useQuery({
     queryKey: ["display", zone ?? ""],
@@ -37,7 +34,6 @@ export function useDisplay(zone?: string) {
   });
 }
 
-/** Admin-only: fetches settings standalone. */
 export function useMosqueSettings() {
   return useQuery({
     queryKey: ["mosque_settings"],
@@ -63,7 +59,22 @@ export function useSlideshow(activeOnly = true) {
   });
 }
 
-/** Subscribe to SSE events from the server and invalidate caches so the TV refreshes instantly. */
+export function useIslamicEvents() {
+  return useQuery({
+    queryKey: ["islamic_events"],
+    queryFn: listIslamicEvents,
+    refetchInterval: 60 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+  });
+}
+
+export function useIslamicEventsAdmin() {
+  return useQuery({
+    queryKey: ["islamic_events_admin"],
+    queryFn: listIslamicEventsAdmin,
+  });
+}
+
 export function useRealtimeDisplay() {
   const qc = useQueryClient();
   useEffect(() => {
@@ -71,14 +82,15 @@ export function useRealtimeDisplay() {
     const es = new EventSource("/api/events");
     es.onmessage = (ev) => {
       const e = ev.data;
-      // Combined endpoint covers everything for the display
       qc.invalidateQueries({ queryKey: ["display"] });
       if (e === "settings") qc.invalidateQueries({ queryKey: ["mosque_settings"] });
       else if (e === "announcements") qc.invalidateQueries({ queryKey: ["announcements"] });
       else if (e === "slideshow") qc.invalidateQueries({ queryKey: ["slideshow"] });
+      else if (e === "islamic_events") {
+        qc.invalidateQueries({ queryKey: ["islamic_events"] });
+        qc.invalidateQueries({ queryKey: ["islamic_events_admin"] });
+      }
     };
-    return () => {
-      es.close();
-    };
+    return () => { es.close(); };
   }, [qc]);
 }
