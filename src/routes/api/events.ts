@@ -4,23 +4,37 @@ import { subscribe } from "@/server/events.server";
 export const Route = createFileRoute("/api/events")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async ({ request }) => {
+        const enc = new TextEncoder();
+        let ping: ReturnType<typeof setInterval> | undefined;
+        let unsub: (() => void) | undefined;
+        let closed = false;
+
+        const cleanup = () => {
+          if (closed) return;
+          closed = true;
+          if (ping) clearInterval(ping);
+          if (unsub) unsub();
+        };
+
         const stream = new ReadableStream({
           start(controller) {
-            const enc = new TextEncoder();
-            const send = (e: string) => controller.enqueue(enc.encode(`data: ${e}\n\n`));
-            send("hello");
-            const unsub = subscribe((event) => send(event));
-            const ping = setInterval(() => send("ping"), 25_000);
-            (controller as unknown as { _close?: () => void })._close = () => {
-              clearInterval(ping);
-              unsub();
+            const send = (e: string) => {
+              if (closed) return;
+              try {
+                controller.enqueue(enc.encode(`data: ${e}\n\n`));
+              } catch {
+                cleanup();
+              }
             };
+            send("hello");
+            unsub = subscribe(send);
+            ping = setInterval(() => send("ping"), 25_000);
+            request.signal.addEventListener("abort", cleanup);
           },
-          cancel() {
-            // controller cleanup is handled when start's closures go out of scope
-          },
+          cancel: cleanup,
         });
+
         return new Response(stream, {
           status: 200,
           headers: {
