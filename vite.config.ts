@@ -24,5 +24,11 @@ export default defineConfig({
         process.env.NODE_ENV ?? "production",
       ),
     },
+    server: {
+      host: true,
+      port: 8080,
+      strictPort: true,
+      allowedHosts: [".tail852be3.ts.net"],
+    },
   },
 });
