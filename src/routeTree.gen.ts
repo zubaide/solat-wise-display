@@ -33,6 +33,7 @@ import { Route as ApiAdminUploadRouteImport } from './routes/api/admin.upload'
 import { Route as ApiAdminSlidesRouteImport } from './routes/api/admin.slides'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
 import { Route as ApiAdminPrayerTimesRouteImport } from './routes/api/admin.prayer-times'
+import { Route as ApiAdminMonitorRouteImport } from './routes/api/admin.monitor'
 import { Route as ApiAdminIslamicEventsRouteImport } from './routes/api/admin.islamic-events'
 import { Route as ApiAdminAnnouncementsRouteImport } from './routes/api/admin.announcements'
 
@@ -156,6 +157,11 @@ const ApiAdminPrayerTimesRoute = ApiAdminPrayerTimesRouteImport.update({
   path: '/api/admin/prayer-times',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminMonitorRoute = ApiAdminMonitorRouteImport.update({
+  id: '/api/admin/monitor',
+  path: '/api/admin/monitor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminIslamicEventsRoute = ApiAdminIslamicEventsRouteImport.update({
   id: '/api/admin/islamic-events',
   path: '/api/admin/islamic-events',
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
   '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
+  '/api/admin/monitor': typeof ApiAdminMonitorRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/slides': typeof ApiAdminSlidesRoute
@@ -205,6 +212,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
   '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
+  '/api/admin/monitor': typeof ApiAdminMonitorRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/slides': typeof ApiAdminSlidesRoute
@@ -234,6 +242,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
   '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
+  '/api/admin/monitor': typeof ApiAdminMonitorRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/slides': typeof ApiAdminSlidesRoute
@@ -264,6 +273,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/api/admin/announcements'
     | '/api/admin/islamic-events'
+    | '/api/admin/monitor'
     | '/api/admin/prayer-times'
     | '/api/admin/settings'
     | '/api/admin/slides'
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/api/admin/announcements'
     | '/api/admin/islamic-events'
+    | '/api/admin/monitor'
     | '/api/admin/prayer-times'
     | '/api/admin/settings'
     | '/api/admin/slides'
@@ -319,6 +330,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/api/admin/announcements'
     | '/api/admin/islamic-events'
+    | '/api/admin/monitor'
     | '/api/admin/prayer-times'
     | '/api/admin/settings'
     | '/api/admin/slides'
@@ -344,6 +356,7 @@ export interface RootRouteChildren {
   ApiEventsRoute: typeof ApiEventsRoute
   ApiAdminAnnouncementsRoute: typeof ApiAdminAnnouncementsRoute
   ApiAdminIslamicEventsRoute: typeof ApiAdminIslamicEventsRoute
+  ApiAdminMonitorRoute: typeof ApiAdminMonitorRoute
   ApiAdminPrayerTimesRoute: typeof ApiAdminPrayerTimesRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminSlidesRoute: typeof ApiAdminSlidesRoute
@@ -532,6 +545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminPrayerTimesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/monitor': {
+      id: '/api/admin/monitor'
+      path: '/api/admin/monitor'
+      fullPath: '/api/admin/monitor'
+      preLoaderRoute: typeof ApiAdminMonitorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/islamic-events': {
       id: '/api/admin/islamic-events'
       path: '/api/admin/islamic-events'
@@ -572,6 +592,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEventsRoute: ApiEventsRoute,
   ApiAdminAnnouncementsRoute: ApiAdminAnnouncementsRoute,
   ApiAdminIslamicEventsRoute: ApiAdminIslamicEventsRoute,
+  ApiAdminMonitorRoute: ApiAdminMonitorRoute,
   ApiAdminPrayerTimesRoute: ApiAdminPrayerTimesRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminSlidesRoute: ApiAdminSlidesRoute,
