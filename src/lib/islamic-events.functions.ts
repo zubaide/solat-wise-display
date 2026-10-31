@@ -10,6 +10,7 @@ export interface IslamicEventRow {
   background_url: string;
   custom_text: string;
   hari_ini_message: string;
+  duration_seconds: number;
   sort_order: number;
   is_active: boolean;
 }
@@ -20,6 +21,7 @@ export interface IslamicEventUpdate {
   background_url: string;
   custom_text: string;
   hari_ini_message: string;
+  duration_seconds: number;
   is_active: boolean;
 }
 
@@ -31,6 +33,11 @@ const BULAN_MASIHI = [
 ];
 
 const HARI_MELAYU = ["Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"];
+
+const MONTHS_SHORT = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
 
 export function klToday(): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -57,6 +64,39 @@ export function formatGregorianDate(dateStr: string): string {
   const [y, m, d] = dateStr.split("-").map(Number);
   const dow = new Date(Date.UTC(y, m - 1, d, 4)).getUTCDay();
   return `${HARI_MELAYU[dow]}, ${d} ${BULAN_MASIHI[m - 1]} ${y}`;
+}
+
+export function formatDateShort(dateStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  if (!y || !m || !d) return "";
+  return `${String(d).padStart(2, "0")}-${MONTHS_SHORT[m - 1]}-${y}`;
+}
+
+export function getHijriYear(dateStr: string, hijriMonth: number): number {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  if (!y || !m || !d) return 0;
+  try {
+    const parts = new Intl.DateTimeFormat("en-TN-u-ca-islamic-umalqura", {
+      day: "numeric", month: "numeric", year: "numeric",
+      timeZone: "UTC",
+    }).formatToParts(new Date(Date.UTC(y, m - 1, d, 12)));
+    const year = Number(parts.find((p) => p.type === "year")?.value);
+    const month = Number(parts.find((p) => p.type === "month")?.value);
+    if (!year || !month) return 0;
+    if (hijriMonth - month >= 6) return year - 1;
+    if (month - hijriMonth >= 6) return year + 1;
+    return year;
+  } catch {
+    return 0;
+  }
+}
+
+export function formatHijriLabel(
+  event: Pick<IslamicEventRow, "hijri_label" | "hijri_month">,
+  dateStr: string,
+): string {
+  const year = getHijriYear(dateStr, event.hijri_month);
+  return year ? `${event.hijri_label} ${year} H` : `${event.hijri_label} H`;
 }
 
 async function jsonOrThrow(res: Response) {
