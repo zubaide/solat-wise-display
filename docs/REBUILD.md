@@ -192,4 +192,5 @@ console.log("rows changed:",r.changes)'; unset NEWPW
 - Text slides live in the `slideshow_images` table. `migrateDb()` adds their columns at start, and the background of a text slide is its `image_url`.
 - The Quran line is read by `src/routes/api/admin.quran.ts` from `data/quran/quran-uthmani.txt`. It refuses to run unless the file has 6236 verses, takes at most 10 ayat per lookup, and in a range ends each ayah with a verse-end marker and its number.
 - `src/lib/surahs.ts` holds the surah names and ayat counts for the dropdown. The counts were checked against the Tanzil file.
+- `.env` is not tracked and not needed: the app reads no Supabase settings, so a fresh clone runs without one. The code repo is public, so never commit `.env`, the database, uploads or tokens.
 - `docs/PI_SETUP.md` is from the old setup and is out of date.
