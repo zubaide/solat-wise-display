@@ -58,6 +58,8 @@ cd ~/solat-wise-display && grep -c '^[0-9]*|[0-9]*|' data/quran/quran-uthmani.tx
 
 It prints 6236, one line per verse. Keep the Tanzil notice at the bottom of that file, because the terms require it. If you ever replace the file, download the Uthmani type (not "Uthmani Minimal") from tanzil.net/download, in the text format with verse numbers.
 
+The TV slide shows no Tanzil credit. The admin text form carries the source link to tanzil.net, which Tanzil's notice asks apps to indicate, so keep that link there.
+
 The font is in uploads, so the restore above brings it back as `data/uploads/KFGQPC-Hafs-V30.ttf`. If it is missing, download KFGQPC Uthmanic Script HAFS from the King Fahd Complex font site (fonts.qurancomplex.gov.sa), use it unmodified, and check its name:
 
 ~~bash
@@ -177,7 +179,7 @@ console.log("rows changed:",r.changes)'; unset NEWPW
 - The admin page at `/login` works, and its system-status panel shows disk, temperature and clock.
 - The Funnel address opens from a phone on mobile data.
 - Zone and times: the display shows real times, not fallback ones (`curl -s localhost:8080/api/data/display | grep -o '"source":"[a-z]*"'` prints local).
-- Text slides: in `/admin/slideshow` choose the text type, enter `2:255` and press "Ambil dari Tanzil". The preview shows the Arabic in the Hafs font with the small marks in place. A plain fallback font means the font file is missing or misnamed.
+- Text slides: in `/admin/slideshow` choose the text type, pick Al-Baqarah, set both ayat boxes to 255 and press "Ambil dari Tanzil". The preview shows the Arabic in the Hafs font with the small marks in place. A plain fallback font means the font file is missing or misnamed. A range such as 285 to 286 ends each ayah with its number marker.
 
 ## Gotchas learned
 
@@ -188,5 +190,6 @@ console.log("rows changed:",r.changes)'; unset NEWPW
 - The Pi has about 900 MB of RAM. The dev server uses about 150 MB, and swap is compressed RAM (zram), not the SD card.
 - The blackout setting accepts 1 to 60 minutes.
 - Text slides live in the `slideshow_images` table. `migrateDb()` adds their columns at start, and the background of a text slide is its `image_url`.
-- The Quran line is read by `src/routes/api/admin.quran.ts` from `data/quran/quran-uthmani.txt`. It refuses to run unless the file has 6236 verses. The slide credits tanzil.net only while row 2 is untouched Tanzil text.
+- The Quran line is read by `src/routes/api/admin.quran.ts` from `data/quran/quran-uthmani.txt`. It refuses to run unless the file has 6236 verses, takes at most 10 ayat per lookup, and in a range ends each ayah with a verse-end marker and its number.
+- `src/lib/surahs.ts` holds the surah names and ayat counts for the dropdown. The counts were checked against the Tanzil file.
 - `docs/PI_SETUP.md` is from the old setup and is out of date.
