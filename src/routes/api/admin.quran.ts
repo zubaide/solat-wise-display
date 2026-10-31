@@ -6,7 +6,9 @@ import { getSession } from "@/server/session.server";
 
 const QURAN_FILE = join(DATA_DIR, "quran", "quran-uthmani.txt");
 const TOTAL_AYAT = 6236;
-const MAX_AYAT = 20;
+const MAX_AYAT = 10;
+const MAX_CHARS = 6000;
+const AYAH_END = "\u06DD";
 
 let cache: Map<string, string> | null = null;
 
@@ -24,6 +26,9 @@ function loadQuran(): Map<string, string> {
   cache = verses;
   return verses;
 }
+
+const arabicDigits = (n: number) =>
+  String(n).replace(/\d/g, (d) => String.fromCharCode(0x0660 + Number(d)));
 
 export const Route = createFileRoute("/api/admin/quran")({
   server: {
@@ -44,9 +49,9 @@ export const Route = createFileRoute("/api/admin/quran")({
           surah <= 114 &&
           from >= 1 &&
           to >= from;
-        if (!valid) return new Response("Invalid reference", { status: 400 });
+        if (!valid) return new Response("Rujukan tidak sah", { status: 400 });
         if (to - from + 1 > MAX_AYAT) {
-          return new Response(`Maximum ${MAX_AYAT} ayat at a time`, { status: 400 });
+          return new Response(`Maksimum ${MAX_AYAT} ayat sekali ambil`, { status: 400 });
         }
         if (!existsSync(QURAN_FILE)) {
           return new Response("data/quran/quran-uthmani.txt not found", { status: 500 });
@@ -59,14 +64,20 @@ export const Route = createFileRoute("/api/admin/quran")({
           return new Response(e instanceof Error ? e.message : "Quran file error", { status: 500 });
         }
 
+        const isRange = to > from;
         const parts: string[] = [];
         for (let n = from; n <= to; n++) {
           const text = verses.get(`${surah}:${n}`);
-          if (!text) return new Response(`Ayat ${surah}:${n} not found`, { status: 404 });
-          parts.push(text);
+          if (!text) return new Response(`Ayat ${surah}:${n} tidak dijumpai`, { status: 404 });
+          parts.push(isRange ? `${text} ${AYAH_END}${arabicDigits(n)}` : text);
         }
-        const ref = from === to ? `${surah}:${from}` : `${surah}:${from}-${to}`;
-        return Response.json({ text: parts.join(" "), ref });
+
+        const joined = parts.join(" ");
+        if (joined.length > MAX_CHARS) {
+          return new Response("Teks terlalu panjang untuk satu slaid", { status: 400 });
+        }
+        const ref = isRange ? `${surah}:${from}-${to}` : `${surah}:${from}`;
+        return Response.json({ text: joined, ref });
       },
     },
   },

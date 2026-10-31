@@ -5,7 +5,6 @@ export interface TextSlideData {
   image_url: string;
   title: string;
   arabic_text: string;
-  quran_ref: string;
   translation: string;
   title_size: number;
   arabic_size: number;
@@ -86,15 +85,6 @@ export function TextSlide({ slide }: { slide: TextSlideData }) {
           </p>
         )}
       </div>
-
-      {slide.quran_ref && (
-        <p
-          className="absolute inset-x-0 text-center text-white/50"
-          style={{ bottom: "1cqw", fontSize: "1.2cqw" }}
-        >
-          Al-Quran {slide.quran_ref} · Sumber teks: tanzil.net
-        </p>
-      )}
     </div>
   );
 }

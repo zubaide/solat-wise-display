@@ -69,25 +69,6 @@ export function HeroSlideshow({
           )}
         </>
       )}
-
-      {count > 1 && (
-        <div
-          className={[
-            "absolute left-1/2 z-10 flex -translate-x-1/2 gap-2",
-            isText ? "bottom-10" : "bottom-4",
-          ].join(" ")}
-        >
-          {slides.map((_, i) => (
-            <span
-              key={i}
-              className={[
-                "h-1.5 rounded-full transition-all",
-                i === safeIdx ? "w-8 bg-gold" : "w-1.5 bg-gold/60",
-              ].join(" ")}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
