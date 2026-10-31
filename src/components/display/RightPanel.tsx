@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { SlideshowImage } from "@/lib/display-data";
+import { TextSlide } from "./TextSlide";
+import { QuranFontFace } from "./QuranFontFace";
 
 interface Props {
   slides: SlideshowImage[];
@@ -22,19 +24,28 @@ export function RightPanel({ slides, donationGoal, donationCurrent }: Props) {
     return () => clearInterval(id);
   }, [count]);
   const slide = slides[idx];
+  const isText = slide?.slide_type === "text";
+  const hasQuranSlide = slides.some((s) => s.slide_type === "text" && s.arabic_text);
   const progress = donationGoal > 0 ? Math.min(100, (donationCurrent / donationGoal) * 100) : 0;
 
   return (
     <aside className="flex h-full flex-col gap-4">
       <div className="flex-1 overflow-hidden rounded-2xl border border-gold/20 bg-gradient-surface shadow-elegant">
         <div className="relative h-full p-8">
+          {hasQuranSlide && <QuranFontFace />}
           {slide ? (
             <div key={slide.id} className="absolute inset-0 animate-fade-in">
-              <img src={slide.image_url} alt={slide.caption ?? ""} className="h-full w-full object-cover" />
-              {slide.caption && (
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                  <p className="font-display text-2xl font-bold text-white">{slide.caption}</p>
-                </div>
+              {isText ? (
+                <TextSlide slide={slide} />
+              ) : (
+                <>
+                  <img src={slide.image_url} alt={slide.caption ?? ""} className="h-full w-full object-cover" />
+                  {slide.caption && (
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                      <p className="font-display text-2xl font-bold text-white">{slide.caption}</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ) : (
@@ -45,7 +56,12 @@ export function RightPanel({ slides, donationGoal, donationCurrent }: Props) {
             </div>
           )}
           {count > 1 && (
-            <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+            <div
+              className={[
+                "absolute left-1/2 z-10 flex -translate-x-1/2 gap-2",
+                isText ? "bottom-10" : "bottom-4",
+              ].join(" ")}
+            >
               {slides.map((_, i) => (
                 <span
                   key={i}

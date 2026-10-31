@@ -300,6 +300,14 @@ export interface SlideRow {
   interval_seconds: number;
   show_header: boolean;
   show_footer: boolean;
+  slide_type: "photo" | "text";
+  title: string;
+  arabic_text: string;
+  quran_ref: string;
+  translation: string;
+  title_size: number;
+  arabic_size: number;
+  translation_size: number;
 }
 
 type RawAnnouncement = Omit<AnnouncementRow, "is_active"> & { is_active: number };
@@ -331,6 +339,14 @@ function migrateDb(d: Database.Database) {
   try { d.exec("ALTER TABLE mosque_settings ADD COLUMN islamic_event_interval_minutes INTEGER NOT NULL DEFAULT 2"); } catch {}
   try { d.exec("ALTER TABLE mosque_settings ADD COLUMN islamic_event_duration_seconds INTEGER NOT NULL DEFAULT 20"); } catch {}
   try { d.exec("ALTER TABLE mosque_settings ADD COLUMN font_scale INTEGER NOT NULL DEFAULT 100"); } catch {}
+  try { d.exec("ALTER TABLE slideshow_images ADD COLUMN slide_type TEXT NOT NULL DEFAULT 'photo'"); } catch {}
+  try { d.exec("ALTER TABLE slideshow_images ADD COLUMN title TEXT NOT NULL DEFAULT ''"); } catch {}
+  try { d.exec("ALTER TABLE slideshow_images ADD COLUMN arabic_text TEXT NOT NULL DEFAULT ''"); } catch {}
+  try { d.exec("ALTER TABLE slideshow_images ADD COLUMN quran_ref TEXT NOT NULL DEFAULT ''"); } catch {}
+  try { d.exec("ALTER TABLE slideshow_images ADD COLUMN translation TEXT NOT NULL DEFAULT ''"); } catch {}
+  try { d.exec("ALTER TABLE slideshow_images ADD COLUMN title_size INTEGER NOT NULL DEFAULT 100"); } catch {}
+  try { d.exec("ALTER TABLE slideshow_images ADD COLUMN arabic_size INTEGER NOT NULL DEFAULT 100"); } catch {}
+  try { d.exec("ALTER TABLE slideshow_images ADD COLUMN translation_size INTEGER NOT NULL DEFAULT 100"); } catch {}
   try { d.exec(`UPDATE mosque_settings SET clock_face = 'analog-gold' WHERE clock_face IN ('gold', 'white')`); } catch {}
   try { d.exec(`UPDATE mosque_settings SET clock_face = 'analog-dark' WHERE clock_face = 'dark'`); } catch {}
   try { d.exec(`UPDATE mosque_settings SET clock_face = 'digital-green' WHERE clock_face = 'green'`); } catch {}

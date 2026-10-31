@@ -22,6 +22,7 @@ import { Route as ApiDataSlidesRouteImport } from './routes/api/data.slides'
 import { Route as ApiDataSettingsRouteImport } from './routes/api/data.settings'
 import { Route as ApiDataPrayerTimesRouteImport } from './routes/api/data.prayer-times'
 import { Route as ApiDataPrayerLibraryRouteImport } from './routes/api/data.prayer-library'
+import { Route as ApiDataOnlineRouteImport } from './routes/api/data.online'
 import { Route as ApiDataIslamicEventsRouteImport } from './routes/api/data.islamic-events'
 import { Route as ApiDataDisplayRouteImport } from './routes/api/data.display'
 import { Route as ApiDataAnnouncementsRouteImport } from './routes/api/data.announcements'
@@ -32,7 +33,9 @@ import { Route as ApiAuthChangePasswordRouteImport } from './routes/api/auth.cha
 import { Route as ApiAdminUploadRouteImport } from './routes/api/admin.upload'
 import { Route as ApiAdminSlidesRouteImport } from './routes/api/admin.slides'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin.settings'
+import { Route as ApiAdminQuranRouteImport } from './routes/api/admin.quran'
 import { Route as ApiAdminPrayerTimesRouteImport } from './routes/api/admin.prayer-times'
+import { Route as ApiAdminPowerRouteImport } from './routes/api/admin.power'
 import { Route as ApiAdminMonitorRouteImport } from './routes/api/admin.monitor'
 import { Route as ApiAdminIslamicEventsRouteImport } from './routes/api/admin.islamic-events'
 import { Route as ApiAdminAnnouncementsRouteImport } from './routes/api/admin.announcements'
@@ -102,6 +105,11 @@ const ApiDataPrayerLibraryRoute = ApiDataPrayerLibraryRouteImport.update({
   path: '/api/data/prayer-library',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDataOnlineRoute = ApiDataOnlineRouteImport.update({
+  id: '/api/data/online',
+  path: '/api/data/online',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDataIslamicEventsRoute = ApiDataIslamicEventsRouteImport.update({
   id: '/api/data/islamic-events',
   path: '/api/data/islamic-events',
@@ -152,9 +160,19 @@ const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
   path: '/api/admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminQuranRoute = ApiAdminQuranRouteImport.update({
+  id: '/api/admin/quran',
+  path: '/api/admin/quran',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminPrayerTimesRoute = ApiAdminPrayerTimesRouteImport.update({
   id: '/api/admin/prayer-times',
   path: '/api/admin/prayer-times',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminPowerRoute = ApiAdminPowerRouteImport.update({
+  id: '/api/admin/power',
+  path: '/api/admin/power',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminMonitorRoute = ApiAdminMonitorRouteImport.update({
@@ -185,7 +203,9 @@ export interface FileRoutesByFullPath {
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
   '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
   '/api/admin/monitor': typeof ApiAdminMonitorRoute
+  '/api/admin/power': typeof ApiAdminPowerRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
+  '/api/admin/quran': typeof ApiAdminQuranRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/slides': typeof ApiAdminSlidesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
@@ -196,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/api/data/announcements': typeof ApiDataAnnouncementsRoute
   '/api/data/display': typeof ApiDataDisplayRoute
   '/api/data/islamic-events': typeof ApiDataIslamicEventsRoute
+  '/api/data/online': typeof ApiDataOnlineRoute
   '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
   '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
   '/api/data/settings': typeof ApiDataSettingsRoute
@@ -213,7 +234,9 @@ export interface FileRoutesByTo {
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
   '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
   '/api/admin/monitor': typeof ApiAdminMonitorRoute
+  '/api/admin/power': typeof ApiAdminPowerRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
+  '/api/admin/quran': typeof ApiAdminQuranRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/slides': typeof ApiAdminSlidesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
@@ -224,6 +247,7 @@ export interface FileRoutesByTo {
   '/api/data/announcements': typeof ApiDataAnnouncementsRoute
   '/api/data/display': typeof ApiDataDisplayRoute
   '/api/data/islamic-events': typeof ApiDataIslamicEventsRoute
+  '/api/data/online': typeof ApiDataOnlineRoute
   '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
   '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
   '/api/data/settings': typeof ApiDataSettingsRoute
@@ -243,7 +267,9 @@ export interface FileRoutesById {
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
   '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
   '/api/admin/monitor': typeof ApiAdminMonitorRoute
+  '/api/admin/power': typeof ApiAdminPowerRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
+  '/api/admin/quran': typeof ApiAdminQuranRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/slides': typeof ApiAdminSlidesRoute
   '/api/admin/upload': typeof ApiAdminUploadRoute
@@ -254,6 +280,7 @@ export interface FileRoutesById {
   '/api/data/announcements': typeof ApiDataAnnouncementsRoute
   '/api/data/display': typeof ApiDataDisplayRoute
   '/api/data/islamic-events': typeof ApiDataIslamicEventsRoute
+  '/api/data/online': typeof ApiDataOnlineRoute
   '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
   '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
   '/api/data/settings': typeof ApiDataSettingsRoute
@@ -274,7 +301,9 @@ export interface FileRouteTypes {
     | '/api/admin/announcements'
     | '/api/admin/islamic-events'
     | '/api/admin/monitor'
+    | '/api/admin/power'
     | '/api/admin/prayer-times'
+    | '/api/admin/quran'
     | '/api/admin/settings'
     | '/api/admin/slides'
     | '/api/admin/upload'
@@ -285,6 +314,7 @@ export interface FileRouteTypes {
     | '/api/data/announcements'
     | '/api/data/display'
     | '/api/data/islamic-events'
+    | '/api/data/online'
     | '/api/data/prayer-library'
     | '/api/data/prayer-times'
     | '/api/data/settings'
@@ -302,7 +332,9 @@ export interface FileRouteTypes {
     | '/api/admin/announcements'
     | '/api/admin/islamic-events'
     | '/api/admin/monitor'
+    | '/api/admin/power'
     | '/api/admin/prayer-times'
+    | '/api/admin/quran'
     | '/api/admin/settings'
     | '/api/admin/slides'
     | '/api/admin/upload'
@@ -313,6 +345,7 @@ export interface FileRouteTypes {
     | '/api/data/announcements'
     | '/api/data/display'
     | '/api/data/islamic-events'
+    | '/api/data/online'
     | '/api/data/prayer-library'
     | '/api/data/prayer-times'
     | '/api/data/settings'
@@ -331,7 +364,9 @@ export interface FileRouteTypes {
     | '/api/admin/announcements'
     | '/api/admin/islamic-events'
     | '/api/admin/monitor'
+    | '/api/admin/power'
     | '/api/admin/prayer-times'
+    | '/api/admin/quran'
     | '/api/admin/settings'
     | '/api/admin/slides'
     | '/api/admin/upload'
@@ -342,6 +377,7 @@ export interface FileRouteTypes {
     | '/api/data/announcements'
     | '/api/data/display'
     | '/api/data/islamic-events'
+    | '/api/data/online'
     | '/api/data/prayer-library'
     | '/api/data/prayer-times'
     | '/api/data/settings'
@@ -357,7 +393,9 @@ export interface RootRouteChildren {
   ApiAdminAnnouncementsRoute: typeof ApiAdminAnnouncementsRoute
   ApiAdminIslamicEventsRoute: typeof ApiAdminIslamicEventsRoute
   ApiAdminMonitorRoute: typeof ApiAdminMonitorRoute
+  ApiAdminPowerRoute: typeof ApiAdminPowerRoute
   ApiAdminPrayerTimesRoute: typeof ApiAdminPrayerTimesRoute
+  ApiAdminQuranRoute: typeof ApiAdminQuranRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminSlidesRoute: typeof ApiAdminSlidesRoute
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
@@ -368,6 +406,7 @@ export interface RootRouteChildren {
   ApiDataAnnouncementsRoute: typeof ApiDataAnnouncementsRoute
   ApiDataDisplayRoute: typeof ApiDataDisplayRoute
   ApiDataIslamicEventsRoute: typeof ApiDataIslamicEventsRoute
+  ApiDataOnlineRoute: typeof ApiDataOnlineRoute
   ApiDataPrayerLibraryRoute: typeof ApiDataPrayerLibraryRoute
   ApiDataPrayerTimesRoute: typeof ApiDataPrayerTimesRoute
   ApiDataSettingsRoute: typeof ApiDataSettingsRoute
@@ -468,6 +507,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDataPrayerLibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/data/online': {
+      id: '/api/data/online'
+      path: '/api/data/online'
+      fullPath: '/api/data/online'
+      preLoaderRoute: typeof ApiDataOnlineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/data/islamic-events': {
       id: '/api/data/islamic-events'
       path: '/api/data/islamic-events'
@@ -538,11 +584,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/quran': {
+      id: '/api/admin/quran'
+      path: '/api/admin/quran'
+      fullPath: '/api/admin/quran'
+      preLoaderRoute: typeof ApiAdminQuranRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/prayer-times': {
       id: '/api/admin/prayer-times'
       path: '/api/admin/prayer-times'
       fullPath: '/api/admin/prayer-times'
       preLoaderRoute: typeof ApiAdminPrayerTimesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/power': {
+      id: '/api/admin/power'
+      path: '/api/admin/power'
+      fullPath: '/api/admin/power'
+      preLoaderRoute: typeof ApiAdminPowerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/monitor': {
@@ -593,7 +653,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminAnnouncementsRoute: ApiAdminAnnouncementsRoute,
   ApiAdminIslamicEventsRoute: ApiAdminIslamicEventsRoute,
   ApiAdminMonitorRoute: ApiAdminMonitorRoute,
+  ApiAdminPowerRoute: ApiAdminPowerRoute,
   ApiAdminPrayerTimesRoute: ApiAdminPrayerTimesRoute,
+  ApiAdminQuranRoute: ApiAdminQuranRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminSlidesRoute: ApiAdminSlidesRoute,
   ApiAdminUploadRoute: ApiAdminUploadRoute,
@@ -604,6 +666,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDataAnnouncementsRoute: ApiDataAnnouncementsRoute,
   ApiDataDisplayRoute: ApiDataDisplayRoute,
   ApiDataIslamicEventsRoute: ApiDataIslamicEventsRoute,
+  ApiDataOnlineRoute: ApiDataOnlineRoute,
   ApiDataPrayerLibraryRoute: ApiDataPrayerLibraryRoute,
   ApiDataPrayerTimesRoute: ApiDataPrayerTimesRoute,
   ApiDataSettingsRoute: ApiDataSettingsRoute,
