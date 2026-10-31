@@ -1,9 +1,9 @@
 # Rebuild guide: Surau Seri Tijanni prayer display
 
 Raspberry Pi 3 Model B, Raspberry Pi OS (Trixie, labwc desktop), user `sst`, hostname `suraust`.
-Written from the working setup on 2026-10-29. The full sequence has not been run end to end on a fresh card, so fix any step that fails and update this file.
+Written from the working setup on 2026-10-29; text-slide steps added 2026-10-31. The full sequence has not been run end to end on a fresh card, so fix any step that fails and update this file.
 
-Not held in git: the database and uploads (private repo `zubaide/solat-wise-data`), the GitHub token, and the Tailscale login.
+Not held in git: the database and uploads (private repo `zubaide/solat-wise-data`, which also holds the Hafs font because it sits in uploads), the GitHub token, and the Tailscale login.
 
 ## 1. System
 
@@ -47,6 +47,24 @@ cp -a ~/solat-wise-data/uploads/. ~/solat-wise-display/data/uploads/
 
 Cloning the private repo asks for a login: username `zubaide` and a GitHub token with Contents read and write on both repos.
 Without a backup, the first start creates an empty database with the admin password `admin1234`. Change it at once (step 9).
+
+### Quran text and font for text slides
+
+The Quran text is in git at `data/quran/quran-uthmani.txt` (Tanzil, full Uthmani type). Check it:
+
+~~bash
+cd ~/solat-wise-display && grep -c '^[0-9]*|[0-9]*|' data/quran/quran-uthmani.txt
+~~
+
+It prints 6236, one line per verse. Keep the Tanzil notice at the bottom of that file, because the terms require it. If you ever replace the file, download the Uthmani type (not "Uthmani Minimal") from tanzil.net/download, in the text format with verse numbers.
+
+The font is in uploads, so the restore above brings it back as `data/uploads/KFGQPC-Hafs-V30.ttf`. If it is missing, download KFGQPC Uthmanic Script HAFS from the King Fahd Complex font site (fonts.qurancomplex.gov.sa), use it unmodified, and check its name:
+
+~~bash
+fc-scan --format "%{family} | %{fullname}\n" ~/solat-wise-display/data/uploads/KFGQPC-Hafs-V30.ttf
+~~
+
+Expect "KFGQPC HAFS Uthmanic Script" (the word order can differ by version). The Complex has other fonts with similar names (Naskh, Kufi, Alphabet Dotted) that are not the right one. A different file name needs the `FONT_URL` line in `src/components/display/QuranFontFace.tsx` edited. The font is kept out of the code repo because its license reserves reproduction and modification to the Complex.
 
 ## 4. Prayer times
 
@@ -159,6 +177,7 @@ console.log("rows changed:",r.changes)'; unset NEWPW
 - The admin page at `/login` works, and its system-status panel shows disk, temperature and clock.
 - The Funnel address opens from a phone on mobile data.
 - Zone and times: the display shows real times, not fallback ones (`curl -s localhost:8080/api/data/display | grep -o '"source":"[a-z]*"'` prints local).
+- Text slides: in `/admin/slideshow` choose the text type, enter `2:255` and press "Ambil dari Tanzil". The preview shows the Arabic in the Hafs font with the small marks in place. A plain fallback font means the font file is missing or misnamed.
 
 ## Gotchas learned
 
@@ -168,4 +187,6 @@ console.log("rows changed:",r.changes)'; unset NEWPW
 - JAKIM's API ignores a year in the URL. Use the date-range request in `scripts/fetch-prayer-times.ts`.
 - The Pi has about 900 MB of RAM. The dev server uses about 150 MB, and swap is compressed RAM (zram), not the SD card.
 - The blackout setting accepts 1 to 60 minutes.
+- Text slides live in the `slideshow_images` table. `migrateDb()` adds their columns at start, and the background of a text slide is its `image_url`.
+- The Quran line is read by `src/routes/api/admin.quran.ts` from `data/quran/quran-uthmani.txt`. It refuses to run unless the file has 6236 verses. The slide credits tanzil.net only while row 2 is untouched Tanzil text.
 - `docs/PI_SETUP.md` is from the old setup and is out of date.
