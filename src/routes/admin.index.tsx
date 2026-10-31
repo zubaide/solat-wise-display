@@ -55,6 +55,8 @@ const CLOCK_OPTIONS = [
   { value: "digital-silver", label: "Digital — Perak", dot: "#cbd5e1" },
 ] as const;
 
+type PowerAction = "shutdown" | "restart";
+
 function SettingsPage() {
   const { data, refetch, isLoading } = useMosqueSettings();
 
@@ -63,6 +65,8 @@ function SettingsPage() {
   const [uploading, setUploading] = useState(false);
   const [monitor, setMonitor] = useState<MonitorStatus | null>(null);
   const [monitorLoading, setMonitorLoading] = useState(true);
+  const [powerBusy, setPowerBusy] = useState<PowerAction | null>(null);
+  const [powerNotice, setPowerNotice] = useState("");
 
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -124,6 +128,7 @@ function SettingsPage() {
           alert_email: String(form.alert_email ?? ""),
           islamic_event_interval_minutes: Number(form.islamic_event_interval_minutes ?? 2),
           islamic_event_duration_seconds: Number(form.islamic_event_duration_seconds ?? 20),
+          font_scale: Number(form.font_scale ?? 100),
         },
       });
       toast.success("Tetapan disimpan");
@@ -132,6 +137,34 @@ function SettingsPage() {
       toast.error(e instanceof Error ? e.message : "Ralat");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const powerAction = async (action: PowerAction) => {
+    const message =
+      action === "shutdown"
+        ? "Matikan Raspberry Pi?\n\nPaparan akan berhenti dan Pi tidak boleh dihidupkan semula dari jauh. Anda perlu cabut dan pasang semula kuasa."
+        : "Mulakan semula Raspberry Pi?\n\nPaparan akan kembali dalam kira-kira 1-2 minit.";
+    if (!window.confirm(message)) return;
+
+    setPowerBusy(action);
+    setPowerNotice("");
+    try {
+      const res = await fetch("/api/admin/power", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setPowerNotice(
+        action === "shutdown"
+          ? "Pi sedang dimatikan. Tunggu sehingga lampu hijau pada Pi berhenti berkelip sebelum mencabut kuasa."
+          : "Pi sedang dimulakan semula. Muat semula halaman ini selepas 1-2 minit.",
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Ralat");
+      setPowerBusy(null);
     }
   };
 
@@ -283,6 +316,30 @@ function SettingsPage() {
         ))}
 
         <div className="col-span-2 mt-2">
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Saiz Tulisan Paparan</h2>
+        </div>
+        <div className="col-span-2">
+          <Label>Saiz Tulisan: {Number(form.font_scale ?? 100)}%</Label>
+          <input
+            type="range"
+            min={80}
+            max={150}
+            step={5}
+            value={Number(form.font_scale ?? 100)}
+            onChange={(e) => update("font_scale", Number(e.target.value))}
+            className="mt-2 w-full accent-gold"
+          />
+          <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+            <span>80%</span>
+            <span>100% (lalai)</span>
+            <span>150%</span>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Besarkan supaya mudah dibaca dari jauh di TV. Tekan Simpan untuk melihat perubahan pada paparan.
+          </p>
+        </div>
+
+        <div className="col-span-2 mt-2">
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Rupa Jam</h2>
         </div>
         <div className="col-span-2">
@@ -364,6 +421,22 @@ function SettingsPage() {
       </div>
 
       <Button onClick={save} disabled={saving}>{saving ? "Menyimpan..." : "Simpan Perubahan"}</Button>
+
+      <div className="space-y-3 rounded-lg border border-red-500/30 bg-surface-2 p-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-red-400">Kawalan Sistem</h2>
+        <p className="text-xs text-muted-foreground">
+          Sentiasa guna butang ini sebelum memutuskan kuasa Pi. Mencabut kuasa terus boleh merosakkan kad SD.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Button type="button" variant="outline" disabled={powerBusy !== null} onClick={() => powerAction("restart")}>
+            {powerBusy === "restart" ? "Memulakan semula..." : "Mulakan Semula Pi"}
+          </Button>
+          <Button type="button" variant="destructive" disabled={powerBusy !== null} onClick={() => powerAction("shutdown")}>
+            {powerBusy === "shutdown" ? "Mematikan..." : "Matikan Pi"}
+          </Button>
+        </div>
+        {powerNotice && <p className="text-sm text-yellow-400">{powerNotice}</p>}
+      </div>
     </div>
   );
 }

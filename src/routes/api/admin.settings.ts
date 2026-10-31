@@ -22,6 +22,7 @@ const Body = z.object({
   alert_email: z.string().email().or(z.literal("")).default(""),
   islamic_event_interval_minutes: z.number().int().min(1).max(60).default(2),
   islamic_event_duration_seconds: z.number().int().min(5).max(120).default(20),
+  font_scale: z.number().int().min(80).max(150).default(100),
 });
 
 export const Route = createFileRoute("/api/admin/settings")({
@@ -52,6 +53,7 @@ export const Route = createFileRoute("/api/admin/settings")({
               alert_email=@alert_email,
               islamic_event_interval_minutes=@islamic_event_interval_minutes,
               islamic_event_duration_seconds=@islamic_event_duration_seconds,
+              font_scale=@font_scale,
               updated_at=datetime('now')`,
           )
           .run(parsed);

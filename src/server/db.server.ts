@@ -252,6 +252,7 @@ export interface SettingsRow {
   alert_email: string;
   islamic_event_interval_minutes: number;
   islamic_event_duration_seconds: number;
+  font_scale: number;
 }
 
 export interface IslamicEventRow {
@@ -329,6 +330,7 @@ function migrateDb(d: Database.Database) {
   try { d.exec("ALTER TABLE mosque_settings ADD COLUMN alert_email TEXT NOT NULL DEFAULT ''"); } catch {}
   try { d.exec("ALTER TABLE mosque_settings ADD COLUMN islamic_event_interval_minutes INTEGER NOT NULL DEFAULT 2"); } catch {}
   try { d.exec("ALTER TABLE mosque_settings ADD COLUMN islamic_event_duration_seconds INTEGER NOT NULL DEFAULT 20"); } catch {}
+  try { d.exec("ALTER TABLE mosque_settings ADD COLUMN font_scale INTEGER NOT NULL DEFAULT 100"); } catch {}
   try { d.exec(`UPDATE mosque_settings SET clock_face = 'analog-gold' WHERE clock_face IN ('gold', 'white')`); } catch {}
   try { d.exec(`UPDATE mosque_settings SET clock_face = 'analog-dark' WHERE clock_face = 'dark'`); } catch {}
   try { d.exec(`UPDATE mosque_settings SET clock_face = 'digital-green' WHERE clock_face = 'green'`); } catch {}

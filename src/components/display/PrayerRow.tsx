@@ -47,7 +47,7 @@ export function PrayerRow({ times, current, next }: Props) {
               {formatTime12(times[p.key]).replace(/\s?[AP]M/, "")}
             </p>
             {isNext && (
-              <span className="absolute top-1 right-2 text-[10px] uppercase tracking-widest text-emerald">
+              <span className="absolute top-1 right-2 text-xs uppercase tracking-widest text-emerald">
                 Seterusnya
               </span>
             )}

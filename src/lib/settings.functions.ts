@@ -17,6 +17,7 @@ export interface SettingsRow {
   alert_email: string;
   islamic_event_interval_minutes: number;
   islamic_event_duration_seconds: number;
+  font_scale: number;
 }
 
 export interface SettingsUpdate {
@@ -37,6 +38,7 @@ export interface SettingsUpdate {
   alert_email: string;
   islamic_event_interval_minutes: number;
   islamic_event_duration_seconds: number;
+  font_scale: number;
 }
 
 async function jsonOrThrow(res: Response) {

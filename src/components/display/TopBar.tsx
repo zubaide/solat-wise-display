@@ -1,5 +1,6 @@
-import { Clock } from "lucide-react";
+import { Clock, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { PRAYER_LABELS, formatHMS, hijriToday, masihiToday, type PrayerKey } from "@/lib/prayer-utils";
 
 interface Props {
@@ -10,9 +11,29 @@ interface Props {
   nextAt: Date;
 }
 
+function useOnline() {
+  return useQuery({
+    queryKey: ["online"],
+    queryFn: async (): Promise<boolean> => {
+      try {
+        const r = await fetch("/api/data/online", { cache: "no-store" });
+        if (!r.ok) return false;
+        const j = await r.json();
+        return Boolean(j.online);
+      } catch {
+        return false;
+      }
+    },
+    refetchInterval: 30 * 1000,
+    retry: false,
+  });
+}
+
 export function TopBar({ mosqueName, mosqueAddress, logoUrl, nextKey, nextAt }: Props) {
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => new Date());
+  const { data: online } = useOnline();
+
   useEffect(() => {
     setMounted(true);
     const id = setInterval(() => setNow(new Date()), 1000);
@@ -22,6 +43,15 @@ export function TopBar({ mosqueName, mosqueAddress, logoUrl, nextKey, nextAt }: 
   const remaining = Math.max(0, Math.floor((nextAt.getTime() - now.getTime()) / 1000));
   const urgent = remaining > 0 && remaining <= 15 * 60;
   const nextLabel = PRAYER_LABELS.find((p) => p.key === nextKey)!;
+
+  const dotClass =
+    online === undefined ? "bg-muted-foreground" : online ? "bg-emerald" : "bg-warning";
+  const dotTitle =
+    online === undefined
+      ? "Menyemak sambungan"
+      : online
+      ? "Disambung ke internet"
+      : "Tiada sambungan internet";
 
   return (
     <header className="flex items-stretch justify-between gap-6 px-6 pt-4">
@@ -41,12 +71,22 @@ export function TopBar({ mosqueName, mosqueAddress, logoUrl, nextKey, nextAt }: 
 
       <div className="flex flex-col items-end justify-between gap-2">
         <div className="flex items-center gap-2 text-right">
-          <span className="h-2 w-2 rounded-full bg-emerald" />
+          <span
+            className={["h-3 w-3 rounded-full transition-colors", dotClass].join(" ")}
+            title={dotTitle}
+          />
           <p className="font-display text-base font-semibold text-foreground">
             <span className="text-muted-foreground">{masihiToday()}</span>
             <span className="mx-2 text-gold">/</span>
             <span className="font-arabic text-gold">{hijriToday()}</span>
           </p>
+          <a
+            href="/admin"
+            aria-label="Admin"
+            className="ml-2 text-muted-foreground/40 transition-colors hover:text-gold"
+          >
+            <Settings className="h-4 w-4" />
+          </a>
         </div>
         <div className={[
           "flex items-center gap-3 rounded-xl px-4 py-2 shadow-elegant ring-1",

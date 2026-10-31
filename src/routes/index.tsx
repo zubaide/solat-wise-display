@@ -85,6 +85,15 @@ function Index() {
   const announcements = display?.announcements;
   const slides = display?.slides;
 
+  const fontScale = settings?.font_scale ?? 100;
+
+  useEffect(() => {
+    document.documentElement.style.fontSize = `${fontScale}%`;
+    return () => {
+      document.documentElement.style.fontSize = "";
+    };
+  }, [fontScale]);
+
   const { current, next } = useMemo(
     () => (data ? getCurrentAndNext(data, now) : { current: null, next: null }),
     [data, now],

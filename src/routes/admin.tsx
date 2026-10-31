@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tan
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Megaphone, Images, Calendar } from "lucide-react";
+import { LogOut, Settings, Megaphone, Images, Calendar, Monitor } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -58,8 +58,12 @@ function AdminLayout() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-display text-xl font-bold text-gold">Admin Masjid</span>
-            <Link to="/" className="ml-4 text-sm text-muted-foreground hover:text-gold">
-              Lihat Paparan →
+            <Link
+              to="/"
+              className="ml-4 inline-flex items-center gap-2 rounded-lg bg-gradient-gold px-4 py-2 text-sm font-semibold text-primary-foreground shadow-elegant"
+            >
+              <Monitor className="h-4 w-4" />
+              Paparan TV
             </Link>
           </div>
           <div className="flex items-center gap-3 text-sm">
