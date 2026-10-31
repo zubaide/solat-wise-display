@@ -267,6 +267,7 @@ export interface IslamicEventRow {
   background_url: string;
   custom_text: string;
   hari_ini_message: string;
+  duration_seconds: number;
   sort_order: number;
   is_active: boolean;
 }
@@ -339,6 +340,10 @@ function migrateDb(d: Database.Database) {
   try { d.exec("ALTER TABLE mosque_settings ADD COLUMN islamic_event_interval_minutes INTEGER NOT NULL DEFAULT 2"); } catch {}
   try { d.exec("ALTER TABLE mosque_settings ADD COLUMN islamic_event_duration_seconds INTEGER NOT NULL DEFAULT 20"); } catch {}
   try { d.exec("ALTER TABLE mosque_settings ADD COLUMN font_scale INTEGER NOT NULL DEFAULT 100"); } catch {}
+  try {
+    d.exec("ALTER TABLE islamic_events ADD COLUMN duration_seconds INTEGER NOT NULL DEFAULT 20");
+    d.exec("UPDATE islamic_events SET duration_seconds = COALESCE((SELECT islamic_event_duration_seconds FROM mosque_settings LIMIT 1), 20)");
+  } catch {}
   try { d.exec("ALTER TABLE slideshow_images ADD COLUMN slide_type TEXT NOT NULL DEFAULT 'photo'"); } catch {}
   try { d.exec("ALTER TABLE slideshow_images ADD COLUMN title TEXT NOT NULL DEFAULT ''"); } catch {}
   try { d.exec("ALTER TABLE slideshow_images ADD COLUMN arabic_text TEXT NOT NULL DEFAULT ''"); } catch {}
