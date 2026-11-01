@@ -23,9 +23,9 @@ function AnnouncementsPage() {
     try {
       await addAnnouncement({ data: { message: newMsg.trim() } });
       setNewMsg("");
-      toast.success("Pengumuman ditambah");
+      toast.success("Announcement added");
       refetch();
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Ralat"); }
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Error"); }
   };
   const toggle = async (id: string, is_active: boolean) => {
     await updateAnnouncement({ data: { id, is_active } });
@@ -39,16 +39,16 @@ function AnnouncementsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Pengumuman (Ticker)</h1>
-        <p className="text-sm text-muted-foreground">Mesej aktif akan ditayangkan secara berulang di skrin.</p>
+        <h1 className="text-2xl font-bold">Announcements (Ticker)</h1>
+        <p className="text-sm text-muted-foreground">Active messages scroll repeatedly across the screen.</p>
       </div>
 
       <div className="flex gap-2">
-        <Input placeholder="Mesej baharu..." value={newMsg} onChange={(e) => setNewMsg(e.target.value)} />
-        <Button onClick={add}>Tambah</Button>
+        <Input placeholder="New message..." value={newMsg} onChange={(e) => setNewMsg(e.target.value)} />
+        <Button onClick={add}>Add</Button>
       </div>
 
-      {isLoading ? <p>Memuatkan...</p> : (
+      {isLoading ? <p>Loading...</p> : (
         <div className="space-y-2">
           {data?.map((a) => (
             <div key={a.id} className="flex items-center gap-3 rounded-lg border border-border bg-surface-2/40 p-3">
@@ -59,7 +59,7 @@ function AnnouncementsPage() {
               </Button>
             </div>
           ))}
-          {data?.length === 0 && <p className="text-sm text-muted-foreground">Tiada pengumuman lagi.</p>}
+          {data?.length === 0 && <p className="text-sm text-muted-foreground">No announcements yet.</p>}
         </div>
       )}
     </div>
