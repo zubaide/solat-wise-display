@@ -54,28 +54,28 @@ function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-gold/30 bg-surface-1/80 px-6 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+      <header className="border-b border-gold/30 bg-surface-1/80 px-4 py-3 backdrop-blur sm:px-6">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="font-display text-xl font-bold text-gold">Mosque Admin</span>
+            <span className="font-display text-lg font-bold text-gold sm:text-xl">Mosque Admin</span>
             <Link
               to="/"
-              className="ml-4 inline-flex items-center gap-2 rounded-lg bg-gradient-gold px-4 py-2 text-sm font-semibold text-primary-foreground shadow-elegant"
+              className="inline-flex items-center gap-2 rounded-lg bg-gradient-gold px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-elegant sm:ml-4 sm:px-4 sm:py-2"
             >
               <Monitor className="h-4 w-4" />
               TV Display
             </Link>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground">Admin</span>
+            <span className="hidden text-muted-foreground sm:inline">Admin</span>
             <Button size="sm" variant="ghost" onClick={() => signOut().then(() => navigate({ to: "/login" }))}>
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </header>
-      <div className="mx-auto flex max-w-6xl gap-6 p-6">
-        <nav className="w-56 shrink-0 space-y-1">
+      <div className="mx-auto flex max-w-6xl flex-col gap-4 p-3 sm:p-6 md:flex-row md:gap-6">
+        <nav className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:w-56 md:shrink-0 md:flex-col md:overflow-visible">
           {navItems.map((item) => {
             const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
             return (
@@ -83,7 +83,7 @@ function AdminLayout() {
                 key={item.to}
                 to={item.to}
                 className={[
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                  "flex shrink-0 items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 text-sm transition-colors",
                   active ? "bg-gradient-gold text-primary-foreground" : "text-foreground hover:bg-surface-2",
                 ].join(" ")}
               >
@@ -93,7 +93,7 @@ function AdminLayout() {
             );
           })}
         </nav>
-        <main className="flex-1 rounded-2xl border border-gold/20 bg-surface-1/80 p-6">
+        <main className="min-w-0 flex-1 rounded-2xl border border-gold/20 bg-surface-1/80 p-4 sm:p-6">
           <Outlet />
         </main>
       </div>
