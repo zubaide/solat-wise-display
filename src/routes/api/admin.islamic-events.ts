@@ -11,6 +11,7 @@ const UpdateBody = z.object({
   background_url: z.string().max(500).default(""),
   custom_text: z.string().max(500).default(""),
   hari_ini_message: z.string().max(500).default(""),
+  duration_seconds: z.number().int().min(5).max(300).default(20),
   is_active: z.boolean(),
 });
 
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/api/admin/islamic-events")({
               background_url = @background_url,
               custom_text = @custom_text,
               hari_ini_message = @hari_ini_message,
+              duration_seconds = @duration_seconds,
               is_active = @is_active
             WHERE id = @id
           `)
