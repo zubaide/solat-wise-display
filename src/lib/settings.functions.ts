@@ -36,8 +36,6 @@ export interface SettingsUpdate {
   clock_face: string;
   blackout_seconds: number;
   alert_email: string;
-  islamic_event_interval_minutes: number;
-  islamic_event_duration_seconds: number;
   font_scale: number;
 }
 
