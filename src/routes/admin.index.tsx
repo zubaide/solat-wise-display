@@ -49,10 +49,10 @@ function Dot({ s }: { s: string }) {
 }
 
 const CLOCK_OPTIONS = [
-  { value: "digital-gold",   label: "Digital — Emas",  dot: "#c9a84c" },
-  { value: "digital-green",  label: "Digital — Hijau", dot: "#6ee7b7" },
-  { value: "digital-blue",   label: "Digital — Biru",  dot: "#60a5fa" },
-  { value: "digital-silver", label: "Digital — Perak", dot: "#cbd5e1" },
+  { value: "digital-gold",   label: "Digital — Gold",   dot: "#c9a84c" },
+  { value: "digital-green",  label: "Digital — Green",  dot: "#6ee7b7" },
+  { value: "digital-blue",   label: "Digital — Blue",   dot: "#60a5fa" },
+  { value: "digital-silver", label: "Digital — Silver", dot: "#cbd5e1" },
 ] as const;
 
 type PowerAction = "shutdown" | "restart";
@@ -85,7 +85,7 @@ function SettingsPage() {
 
   useEffect(() => { fetchMonitor(); }, []);
 
-  if (isLoading || !data) return <p className="text-muted-foreground">Memuatkan...</p>;
+  if (isLoading || !data) return <p className="text-muted-foreground">Loading...</p>;
 
   const update = (k: string, v: string | number) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -98,9 +98,9 @@ function SettingsPage() {
       if (!res.ok) throw new Error(await res.text());
       const { url } = await res.json();
       update("logo_url", url);
-      toast.success("Logo berjaya dimuat naik");
+      toast.success("Logo uploaded");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Ralat muat naik");
+      toast.error(e instanceof Error ? e.message : "Upload error");
     } finally {
       setUploading(false);
     }
@@ -126,15 +126,13 @@ function SettingsPage() {
           clock_face: String(form.clock_face ?? "digital-gold"),
           blackout_seconds: Number(form.blackout_seconds ?? 300),
           alert_email: String(form.alert_email ?? ""),
-          islamic_event_interval_minutes: Number(form.islamic_event_interval_minutes ?? 2),
-          islamic_event_duration_seconds: Number(form.islamic_event_duration_seconds ?? 20),
           font_scale: Number(form.font_scale ?? 100),
         },
       });
-      toast.success("Tetapan disimpan");
+      toast.success("Settings saved");
       refetch();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Ralat");
+      toast.error(e instanceof Error ? e.message : "Error");
     } finally {
       setSaving(false);
     }
@@ -143,8 +141,8 @@ function SettingsPage() {
   const powerAction = async (action: PowerAction) => {
     const message =
       action === "shutdown"
-        ? "Matikan Raspberry Pi?\n\nPaparan akan berhenti dan Pi tidak boleh dihidupkan semula dari jauh. Anda perlu cabut dan pasang semula kuasa."
-        : "Mulakan semula Raspberry Pi?\n\nPaparan akan kembali dalam kira-kira 1-2 minit.";
+        ? "Shut down the Raspberry Pi?\n\nThe display will stop and the Pi cannot be turned back on remotely. You will need to unplug and replug the power."
+        : "Restart the Raspberry Pi?\n\nThe display will be back in about 1-2 minutes.";
     if (!window.confirm(message)) return;
 
     setPowerBusy(action);
@@ -159,11 +157,11 @@ function SettingsPage() {
       if (!res.ok) throw new Error(await res.text());
       setPowerNotice(
         action === "shutdown"
-          ? "Pi sedang dimatikan. Tunggu sehingga lampu hijau pada Pi berhenti berkelip sebelum mencabut kuasa."
-          : "Pi sedang dimulakan semula. Muat semula halaman ini selepas 1-2 minit.",
+          ? "The Pi is shutting down. Wait until the green light on the Pi stops blinking before unplugging the power."
+          : "The Pi is restarting. Reload this page after 1-2 minutes.",
       );
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Ralat");
+      toast.error(e instanceof Error ? e.message : "Error");
       setPowerBusy(null);
     }
   };
@@ -171,14 +169,14 @@ function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Tetapan Masjid</h1>
-        <p className="text-sm text-muted-foreground">Perubahan akan dipaparkan di skrin TV secara langsung.</p>
+        <h1 className="text-2xl font-bold">Mosque Settings</h1>
+        <p className="text-sm text-muted-foreground">Changes appear on the TV screen live.</p>
       </div>
 
       <div className="rounded-lg border border-input bg-surface-2 p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-gold">Status Sistem</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-gold">System Status</h2>
             {monitor && (
               <span className={["text-xs font-medium px-2 py-0.5 rounded border uppercase", badgeClass(monitor.overall)].join(" ")}>
                 {monitor.overall}
@@ -190,7 +188,7 @@ function SettingsPage() {
             disabled={monitorLoading}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
           >
-            {monitorLoading ? "Menyemak..." : "↻ Muat Semula"}
+            {monitorLoading ? "Checking..." : "↻ Refresh"}
           </button>
         </div>
 
@@ -198,7 +196,7 @@ function SettingsPage() {
           <>
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-md border border-input bg-background p-3">
-                <p className="text-xs text-muted-foreground mb-1">Storan Disk</p>
+                <p className="text-xs text-muted-foreground mb-1">Disk Storage</p>
                 {monitor.disk ? (
                   <>
                     <p className={["flex items-center text-sm font-semibold", statusColor(monitor.disk.status)].join(" ")}>
@@ -211,11 +209,11 @@ function SettingsPage() {
                       </p>
                     )}
                   </>
-                ) : <p className="text-xs text-muted-foreground">Belum ada data</p>}
+                ) : <p className="text-xs text-muted-foreground">No data yet</p>}
               </div>
 
               <div className="rounded-md border border-input bg-background p-3">
-                <p className="text-xs text-muted-foreground mb-1">Suhu CPU</p>
+                <p className="text-xs text-muted-foreground mb-1">CPU Temperature</p>
                 {monitor.temperature ? (
                   <>
                     <p className={["flex items-center text-sm font-semibold", statusColor(monitor.temperature.status)].join(" ")}>
@@ -223,31 +221,31 @@ function SettingsPage() {
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {monitor.temperature.status === "ok" ? "Normal" :
-                       monitor.temperature.status === "warning" ? "Agak Panas" : "Terlalu Panas"}
+                       monitor.temperature.status === "warning" ? "Warm" : "Too Hot"}
                     </p>
                   </>
-                ) : <p className="text-xs text-muted-foreground">Belum ada data</p>}
+                ) : <p className="text-xs text-muted-foreground">No data yet</p>}
               </div>
 
               <div className="rounded-md border border-input bg-background p-3">
-                <p className="text-xs text-muted-foreground mb-1">Jam Sistem</p>
+                <p className="text-xs text-muted-foreground mb-1">System Clock</p>
                 {monitor.clock ? (
                   <>
                     <p className={["flex items-center text-sm font-semibold", statusColor(monitor.clock.status)].join(" ")}>
                       <Dot s={monitor.clock.status} />
-                      {monitor.clock.ntp_synced ? "Segerak" : "Tidak Segerak"}
+                      {monitor.clock.ntp_synced ? "Synced" : "Not Synced"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">{monitor.clock.message}</p>
                   </>
-                ) : <p className="text-xs text-muted-foreground">Belum ada data</p>}
+                ) : <p className="text-xs text-muted-foreground">No data yet</p>}
               </div>
             </div>
 
             {monitor.last_check ? (
-              <p className="text-xs text-muted-foreground">Semakan terakhir: {monitor.last_check}</p>
+              <p className="text-xs text-muted-foreground">Last check: {monitor.last_check}</p>
             ) : (
               <p className="text-xs text-yellow-400">
-                Skrip pemantauan belum dijalankan. Mulakan dengan: ~/solat-wise-display/scripts/monitor.sh
+                The monitoring script has not run yet. Start it with: ~/solat-wise-display/scripts/monitor.sh
               </p>
             )}
           </>
@@ -257,7 +255,7 @@ function SettingsPage() {
       <div className="grid grid-cols-2 gap-4">
 
         <div className="col-span-2">
-          <Label>Logo Masjid</Label>
+          <Label>Mosque Logo</Label>
           <div className="mt-2 flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-2 overflow-hidden border border-gold/30">
               {form.logo_url ? (
@@ -268,11 +266,11 @@ function SettingsPage() {
             </div>
             <div className="flex flex-col gap-2">
               <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => fileRef.current?.click()}>
-                {uploading ? "Memuat naik..." : "Muat Naik Logo"}
+                {uploading ? "Uploading..." : "Upload Logo"}
               </Button>
               {form.logo_url && (
                 <Button type="button" variant="ghost" size="sm" onClick={() => update("logo_url", "")}>
-                  Buang Logo (guna ☪ lalai)
+                  Remove Logo (use default ☪)
                 </Button>
               )}
             </div>
@@ -282,19 +280,19 @@ function SettingsPage() {
         </div>
 
         <div className="col-span-2">
-          <Label>Nama Masjid</Label>
+          <Label>Mosque Name</Label>
           <Input value={String(form.mosque_name ?? "")} onChange={(e) => update("mosque_name", e.target.value)}
-            placeholder="cth: Surau Seri Tijanni" />
+            placeholder="e.g. Surau Seri Tijanni" />
         </div>
 
         <div className="col-span-2">
-          <Label>Teks Bawah Nama (Alamat / Kawasan)</Label>
+          <Label>Text Under Name (Address / Area)</Label>
           <Input value={String(form.mosque_address ?? "")} onChange={(e) => update("mosque_address", e.target.value)}
-            placeholder="cth: Putra Heights, Subang Jaya" />
+            placeholder="e.g. Putra Heights, Subang Jaya" />
         </div>
 
         <div className="col-span-2">
-          <Label>Zon JAKIM</Label>
+          <Label>JAKIM Zone</Label>
           <select className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             value={String(form.zone ?? "")} onChange={(e) => update("zone", e.target.value)}>
             {JAKIM_ZONES.map((z) => (
@@ -304,7 +302,7 @@ function SettingsPage() {
         </div>
 
         <div className="col-span-2 mt-2">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Iqamah (minit selepas azan)</h2>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Iqamah (minutes after azan)</h2>
         </div>
         {(["subuh", "zohor", "asar", "maghrib", "isyak"] as const).map((p) => (
           <div key={p}>
@@ -316,10 +314,10 @@ function SettingsPage() {
         ))}
 
         <div className="col-span-2 mt-2">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Saiz Tulisan Paparan</h2>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Display Font Size</h2>
         </div>
         <div className="col-span-2">
-          <Label>Saiz Tulisan: {Number(form.font_scale ?? 100)}%</Label>
+          <Label>Font Size: {Number(form.font_scale ?? 100)}%</Label>
           <input
             type="range"
             min={80}
@@ -331,19 +329,19 @@ function SettingsPage() {
           />
           <div className="mt-1 flex justify-between text-xs text-muted-foreground">
             <span>80%</span>
-            <span>100% (lalai)</span>
+            <span>100% (default)</span>
             <span>150%</span>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Besarkan supaya mudah dibaca dari jauh di TV. Tekan Simpan untuk melihat perubahan pada paparan.
+            Increase for easier reading from a distance on the TV. Press Save to see the change on the display.
           </p>
         </div>
 
         <div className="col-span-2 mt-2">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Rupa Jam</h2>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Clock Appearance</h2>
         </div>
         <div className="col-span-2">
-          <Label>Tema Jam</Label>
+          <Label>Clock Theme</Label>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {CLOCK_OPTIONS.map((opt) => (
               <button key={opt.value} type="button" onClick={() => update("clock_face", opt.value)}
@@ -360,79 +358,61 @@ function SettingsPage() {
         </div>
 
         <div className="col-span-2 mt-2">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Iqamah Lanjutan</h2>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Advanced Iqamah</h2>
         </div>
         <div>
-          <Label>Tempoh Skrin Gelap (minit)</Label>
+          <Label>Blackout Duration (minutes)</Label>
           <Input type="number" min={1} max={60}
             value={Math.max(1, Math.round(Number(form.blackout_seconds ?? 300) / 60))}
             onChange={(e) => update("blackout_seconds", Number(e.target.value) * 60)} />
         </div>
 
         <div className="col-span-2 mt-2">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Paparan Acara Islam</h2>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Donation Fund & Ticker</h2>
         </div>
         <div>
-          <Label>Selang Masa (minit)</Label>
-          <Input type="number" min={1} max={60}
-            value={Number(form.islamic_event_interval_minutes ?? 2)}
-            onChange={(e) => update("islamic_event_interval_minutes", Number(e.target.value))} />
-          <p className="mt-1 text-xs text-muted-foreground">Selang slide acara Islam muncul di TV. Lalai: 2 minit.</p>
-        </div>
-        <div>
-          <Label>Tempoh Paparan (saat)</Label>
-          <Input type="number" min={5} max={120}
-            value={Number(form.islamic_event_duration_seconds ?? 20)}
-            onChange={(e) => update("islamic_event_duration_seconds", Number(e.target.value))} />
-          <p className="mt-1 text-xs text-muted-foreground">Berapa lama slide acara dipaparkan. Lalai: 20 saat.</p>
-        </div>
-
-        <div className="col-span-2 mt-2">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Tabung & Ticker</h2>
-        </div>
-        <div>
-          <Label>Sasaran Tabung (RM)</Label>
+          <Label>Fund Goal (RM)</Label>
           <Input type="number" value={Number(form.donation_goal ?? 0)}
             onChange={(e) => update("donation_goal", Number(e.target.value))} />
         </div>
         <div>
-          <Label>Kutipan Semasa (RM)</Label>
+          <Label>Current Collection (RM)</Label>
           <Input type="number" value={Number(form.donation_current ?? 0)}
             onChange={(e) => update("donation_current", Number(e.target.value))} />
         </div>
         <div>
-          <Label>Kelajuan Ticker (saat)</Label>
+          <Label>Ticker Speed (seconds)</Label>
           <Input type="number" value={Number(form.ticker_speed ?? 40)}
             onChange={(e) => update("ticker_speed", Number(e.target.value))} />
         </div>
 
         <div className="col-span-2 mt-2">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Pemantauan & Amaran</h2>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gold">Monitoring & Alerts</h2>
         </div>
         <div className="col-span-2">
-          <Label>E-mel Penerima Amaran</Label>
+          <Label>Alert Recipient Email</Label>
           <Input type="email" value={String(form.alert_email ?? "")}
             onChange={(e) => update("alert_email", e.target.value)}
-            placeholder="cth: admin@gmail.com" />
+            placeholder="e.g. admin@gmail.com" />
           <p className="mt-1 text-xs text-muted-foreground">
-            Amaran dihantar apabila suhu tinggi, storan penuh, atau jam tidak segerak. Mesti jalankan scripts/setup-email.sh dahulu.
+            Alerts are sent when the temperature is high, storage is full, or the clock is out of sync. Run scripts/setup-email.sh first.
           </p>
         </div>
       </div>
 
-      <Button onClick={save} disabled={saving}>{saving ? "Menyimpan..." : "Simpan Perubahan"}</Button>
+      <Button onClick={save} disabled={saving}>{saving ? "Saving..." : "Save Changes"}</Button>
 
       <div className="space-y-3 rounded-lg border border-red-500/30 bg-surface-2 p-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-red-400">Kawalan Sistem</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-red-400">System Controls</h2>
         <p className="text-xs text-muted-foreground">
-          Sentiasa guna butang ini sebelum memutuskan kuasa Pi. Mencabut kuasa terus boleh merosakkan kad SD.
+          Always use these buttons before cutting power to the Pi. Unplugging directly can corrupt the SD card.
         </p>
         <div className="flex flex-wrap gap-3">
           <Button type="button" variant="outline" disabled={powerBusy !== null} onClick={() => powerAction("restart")}>
-            {powerBusy === "restart" ? "Memulakan semula..." : "Mulakan Semula Pi"}
+            {powerBusy === "restart" ? "Restarting..." : "Restart Pi"}
           </Button>
           <Button type="button" variant="destructive" disabled={powerBusy !== null} onClick={() => powerAction("shutdown")}>
-            {powerBusy === "shutdown" ? "Mematikan..." : "Matikan Pi"}
+            {powerBusy === "shutdown" ? "Shutting down..." : "Shut Down Pi"}
           </Button>
         </div>
         {powerNotice && <p className="text-sm text-yellow-400">{powerNotice}</p>}
