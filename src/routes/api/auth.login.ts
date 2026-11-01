@@ -23,7 +23,7 @@ export const Route = createFileRoute("/api/auth/login")({
         const ok = bcrypt.compareSync(parsed.password, row.password_hash);
         if (!ok) {
           await new Promise((r) => setTimeout(r, 400));
-          return new Response("Kata laluan salah", { status: 401 });
+          return new Response("Incorrect password", { status: 401 });
         }
         const s = await getSession();
         await s.update({ admin: true, loggedInAt: Date.now() });
