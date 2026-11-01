@@ -416,6 +416,7 @@ function SlideshowPage() {
   };
 
   const remove = async (id: string) => {
+    if (!window.confirm("Delete this slide?")) return;
     await deleteSlide({ data: { id } });
     if (editing?.id === id) setEditing(null);
     refetch();
@@ -482,8 +483,8 @@ function SlideshowPage() {
             <TextFields key={formKey} values={textValues} onChange={setTextValues} />
           )}
 
-          <div className="grid grid-cols-3 gap-3">
-            <div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="col-span-2 sm:col-span-1">
               <Label className="text-xs">Duration (seconds)</Label>
               <Input
                 type="number"
@@ -507,7 +508,7 @@ function SlideshowPage() {
         {isLoading ? (
           <p>Loading...</p>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {data?.map((s) => {
               const isEditing = editing?.id === s.id;
               return (
@@ -515,7 +516,7 @@ function SlideshowPage() {
                   key={s.id}
                   className={[
                     "overflow-hidden rounded-lg border border-border bg-surface-2/40",
-                    isEditing ? "col-span-2" : "",
+                    isEditing ? "lg:col-span-2" : "",
                   ].join(" ")}
                 >
                   {isEditing && editing ? (
@@ -638,7 +639,7 @@ function SlideshowPage() {
               );
             })}
             {data?.length === 0 && (
-              <p className="col-span-2 text-sm text-muted-foreground">No slides yet.</p>
+              <p className="text-sm text-muted-foreground lg:col-span-2">No slides yet.</p>
             )}
           </div>
         )}
