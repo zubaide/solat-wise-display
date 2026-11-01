@@ -16,13 +16,35 @@ export interface IslamicEventRow {
 }
 
 export interface IslamicEventUpdate {
-  date: string;
-  date_confirmed: boolean;
   background_url: string;
   custom_text: string;
   hari_ini_message: string;
   duration_seconds: number;
   is_active: boolean;
+}
+
+export interface IslamicEventDateRow {
+  id: string;
+  event_id: string;
+  date: string;
+  date_confirmed: boolean;
+}
+
+export interface IslamicWindow {
+  end: string | null;
+  starts_on: string | null;
+  showing: boolean;
+}
+
+export interface IslamicEventDatesPayload {
+  dates: IslamicEventDateRow[];
+  window: IslamicWindow;
+}
+
+export interface IslamicEventDateNew {
+  event_id: string;
+  date: string;
+  date_confirmed: boolean;
 }
 
 export type EventState = "today" | "upcoming";
@@ -124,6 +146,44 @@ export async function updateIslamicEvent(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, ...data }),
+      credentials: "include",
+    }),
+  );
+}
+
+export async function listIslamicEventDatesAdmin(): Promise<IslamicEventDatesPayload> {
+  return jsonOrThrow(await fetch("/api/admin/islamic-event-dates", { credentials: "include" }));
+}
+
+export async function addIslamicEventDate(data: IslamicEventDateNew): Promise<{ ok: true }> {
+  return jsonOrThrow(
+    await fetch("/api/admin/islamic-event-dates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      credentials: "include",
+    }),
+  );
+}
+
+export async function setIslamicEventDateConfirmed(
+  id: string,
+  date_confirmed: boolean,
+): Promise<{ ok: true }> {
+  return jsonOrThrow(
+    await fetch("/api/admin/islamic-event-dates", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, date_confirmed }),
+      credentials: "include",
+    }),
+  );
+}
+
+export async function deleteIslamicEventDate(id: string): Promise<{ ok: true }> {
+  return jsonOrThrow(
+    await fetch(`/api/admin/islamic-event-dates?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
       credentials: "include",
     }),
   );
