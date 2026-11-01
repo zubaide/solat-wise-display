@@ -20,8 +20,6 @@ const Body = z.object({
   clock_face: z.enum(["digital-gold", "digital-green", "digital-blue", "digital-silver"]).default("digital-gold"),
   blackout_seconds: z.number().int().min(60).max(3600).default(300),
   alert_email: z.string().email().or(z.literal("")).default(""),
-  islamic_event_interval_minutes: z.number().int().min(1).max(60).default(2),
-  islamic_event_duration_seconds: z.number().int().min(5).max(120).default(20),
   font_scale: z.number().int().min(80).max(150).default(100),
 });
 
@@ -51,8 +49,6 @@ export const Route = createFileRoute("/api/admin/settings")({
               donation_goal=@donation_goal, donation_current=@donation_current,
               clock_face=@clock_face, blackout_seconds=@blackout_seconds,
               alert_email=@alert_email,
-              islamic_event_interval_minutes=@islamic_event_interval_minutes,
-              islamic_event_duration_seconds=@islamic_event_duration_seconds,
               font_scale=@font_scale,
               updated_at=datetime('now')`,
           )
