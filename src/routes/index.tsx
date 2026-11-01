@@ -53,9 +53,6 @@ function Index() {
   const activeEventsRef = useRef(activeIslamicEvents);
   activeEventsRef.current = activeIslamicEvents;
 
-  const settingsRef = useRef(display?.settings);
-  settingsRef.current = display?.settings;
-
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
@@ -68,7 +65,8 @@ function Index() {
 
   useEffect(() => {
     if (!islamicSlideState.active) return;
-    const dur = (settingsRef.current?.islamic_event_duration_seconds ?? 20) * 1000;
+    const event = activeEventsRef.current[islamicSlideState.eventIdx];
+    const dur = (event?.duration_seconds ?? 20) * 1000;
     const id = setTimeout(() => {
       const nextIdx = islamicSlideState.eventIdx + 1;
       if (nextIdx >= activeEventsRef.current.length) {
