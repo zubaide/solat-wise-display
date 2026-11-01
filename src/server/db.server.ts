@@ -285,6 +285,22 @@ export const mapIslamicEvent = (r: RawIslamicEvent): IslamicEventRow => ({
   is_active: !!r.is_active,
 });
 
+export interface IslamicEventDateRow {
+  id: string;
+  event_id: string;
+  date: string;
+  date_confirmed: boolean;
+}
+
+type RawIslamicEventDate = Omit<IslamicEventDateRow, "date_confirmed"> & {
+  date_confirmed: number;
+};
+
+export const mapIslamicEventDate = (r: RawIslamicEventDate): IslamicEventDateRow => ({
+  ...r,
+  date_confirmed: !!r.date_confirmed,
+});
+
 export interface AnnouncementRow {
   id: string;
   message: string;
@@ -331,6 +347,152 @@ export const mapSlide = (r: RawSlide): SlideRow => ({
 
 export const newId = () => randomUUID();
 
+export function todayKL(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kuala_Lumpur",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+export interface IslamicWindow {
+  end: string | null;
+  starts_on: string | null;
+  showing: boolean;
+}
+
+export function getIslamicWindow(today: string): IslamicWindow {
+  const conn = db();
+  const none = { end: null, starts_on: null, showing: false };
+
+  const last = conn
+    .prepare("SELECT id FROM islamic_events ORDER BY sort_order DESC LIMIT 1")
+    .get() as { id: string } | undefined;
+  if (!last) return none;
+
+  const end = (
+    conn
+      .prepare("SELECT MIN(date) AS date FROM islamic_event_dates WHERE event_id = ? AND date >= ?")
+      .get(last.id, today) as { date: string | null }
+  ).date;
+  if (!end) return none;
+
+  const prev = (
+    conn
+      .prepare("SELECT MAX(date) AS date FROM islamic_event_dates WHERE event_id = ? AND date < ?")
+      .get(last.id, end) as { date: string | null }
+  ).date;
+  if (!prev) return { end, starts_on: null, showing: true };
+
+  const startsOn = (
+    conn.prepare("SELECT date(?, '+1 month') AS date").get(prev) as { date: string }
+  ).date;
+  if (today < startsOn) return { end, starts_on: startsOn, showing: false };
+
+  return { end, starts_on: null, showing: true };
+}
+
+const TV_ISLAMIC_EVENTS_SQL = `
+  SELECT
+    e.id,
+    e.name,
+    e.hijri_label,
+    e.hijri_month,
+    e.hijri_day,
+    n.date AS date,
+    e.is_subject_to_announcement,
+    n.date_confirmed AS date_confirmed,
+    e.background_url,
+    e.custom_text,
+    e.hari_ini_message,
+    e.duration_seconds,
+    e.sort_order,
+    e.is_active
+  FROM islamic_events e
+  JOIN islamic_event_dates n ON n.id = (
+    SELECT x.id FROM islamic_event_dates x
+    WHERE x.event_id = e.id AND x.date >= ? AND x.date <= ?
+    ORDER BY x.date
+    LIMIT 1
+  )
+  ORDER BY e.sort_order
+`;
+
+export function listIslamicEventsResolved(today: string): IslamicEventRow[] {
+  const win = getIslamicWindow(today);
+  if (!win.showing || !win.end) return [];
+  return (db().prepare(TV_ISLAMIC_EVENTS_SQL).all(today, win.end) as RawIslamicEvent[]).map(
+    mapIslamicEvent,
+  );
+}
+
+const ADMIN_ISLAMIC_EVENTS_SQL = `
+  SELECT
+    e.id,
+    e.name,
+    e.hijri_label,
+    e.hijri_month,
+    e.hijri_day,
+    COALESCE(n.date, '') AS date,
+    e.is_subject_to_announcement,
+    COALESCE(n.date_confirmed, 0) AS date_confirmed,
+    e.background_url,
+    e.custom_text,
+    e.hari_ini_message,
+    e.duration_seconds,
+    e.sort_order,
+    e.is_active
+  FROM islamic_events e
+  LEFT JOIN islamic_event_dates n ON n.id = COALESCE(
+    (SELECT x.id FROM islamic_event_dates x WHERE x.event_id = e.id AND x.date >= ? ORDER BY x.date LIMIT 1),
+    (SELECT y.id FROM islamic_event_dates y WHERE y.event_id = e.id ORDER BY y.date DESC LIMIT 1)
+  )
+  ORDER BY e.sort_order
+`;
+
+export function listIslamicEventsAdmin(today: string): IslamicEventRow[] {
+  return (db().prepare(ADMIN_ISLAMIC_EVENTS_SQL).all(today) as RawIslamicEvent[]).map(
+    mapIslamicEvent,
+  );
+}
+
+export function listIslamicEventDates(): IslamicEventDateRow[] {
+  return (
+    db()
+      .prepare("SELECT id, event_id, date, date_confirmed FROM islamic_event_dates ORDER BY date")
+      .all() as RawIslamicEventDate[]
+  ).map(mapIslamicEventDate);
+}
+
+function migrateIslamicEventDates(d: Database.Database) {
+  const exists = d
+    .prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'islamic_event_dates'")
+    .get();
+  if (exists) return;
+
+  d.exec(`
+    CREATE TABLE islamic_event_dates (
+      id TEXT PRIMARY KEY,
+      event_id TEXT NOT NULL REFERENCES islamic_events(id) ON DELETE CASCADE,
+      date TEXT NOT NULL,
+      date_confirmed INTEGER NOT NULL DEFAULT 0,
+      UNIQUE (event_id, date)
+    );
+  `);
+
+  const events = d
+    .prepare("SELECT id, date, date_confirmed FROM islamic_events WHERE date != ''")
+    .all() as { id: string; date: string; date_confirmed: number }[];
+  const insert = d.prepare(
+    "INSERT OR IGNORE INTO islamic_event_dates (id, event_id, date, date_confirmed) VALUES (?, ?, ?, ?)",
+  );
+  const seed = d.transaction(() => {
+    for (const e of events) insert.run(randomUUID(), e.id, e.date, e.date_confirmed);
+  });
+  seed();
+}
+
 function migrateDb(d: Database.Database) {
   try { d.exec("ALTER TABLE mosque_settings ADD COLUMN mosque_address TEXT NOT NULL DEFAULT 'Zon SGR02'"); } catch {}
   try { d.exec("ALTER TABLE mosque_settings ADD COLUMN logo_url TEXT NOT NULL DEFAULT ''"); } catch {}
@@ -356,4 +518,9 @@ function migrateDb(d: Database.Database) {
   try { d.exec(`UPDATE mosque_settings SET clock_face = 'analog-dark' WHERE clock_face = 'dark'`); } catch {}
   try { d.exec(`UPDATE mosque_settings SET clock_face = 'digital-green' WHERE clock_face = 'green'`); } catch {}
   try { d.exec(`UPDATE mosque_settings SET clock_face = 'digital-gold' WHERE clock_face IN ('analog-gold', 'analog-dark')`); } catch {}
+  try {
+    migrateIslamicEventDates(d);
+  } catch (e) {
+    console.error("islamic_event_dates migration failed:", e);
+  }
 }
