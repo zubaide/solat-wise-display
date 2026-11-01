@@ -1,5 +1,11 @@
 import type { IslamicEventRow } from "@/lib/islamic-events.functions";
-import { klToday, getEventState, getDaysLeft, formatGregorianDate } from "@/lib/islamic-events.functions";
+import {
+  klToday,
+  getEventState,
+  getDaysLeft,
+  formatGregorianDate,
+  formatHijriLabel,
+} from "@/lib/islamic-events.functions";
 
 interface Props {
   event: IslamicEventRow;
@@ -38,7 +44,7 @@ export function IslamicEventSlide({ event }: Props) {
           {event.name}
         </h1>
 
-        <p className="text-2xl text-gold mb-1">{event.hijri_label} H</p>
+        <p className="text-2xl text-gold mb-1">{formatHijriLabel(event, event.date)}</p>
         <p className="text-lg text-white/60 mb-8">{formattedDate}</p>
 
         {state === "today" ? (
