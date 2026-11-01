@@ -27,7 +27,7 @@ export const Route = createFileRoute("/api/admin/power")({
         }
         const cmd = action === "shutdown" ? "poweroff" : "reboot";
         if (!(await sudoAllows(cmd))) {
-          return new Response("Kebenaran sudo belum ditetapkan pada Pi", { status: 500 });
+          return new Response("Sudo permission is not configured on the Pi", { status: 500 });
         }
         try {
           db().pragma("wal_checkpoint(TRUNCATE)");
