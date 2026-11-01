@@ -2,7 +2,12 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { listAnnouncements, type AnnouncementRow } from "@/lib/announcements.functions";
 import { listSlides, type SlideRow } from "@/lib/slideshow.functions";
-import { listIslamicEvents, listIslamicEventsAdmin, type IslamicEventRow } from "@/lib/islamic-events.functions";
+import {
+  listIslamicEvents,
+  listIslamicEventsAdmin,
+  listIslamicEventDatesAdmin,
+  type IslamicEventRow,
+} from "@/lib/islamic-events.functions";
 import type { SettingsRow } from "@/lib/settings.functions";
 import type { PrayerTimesPayload } from "@/lib/prayer.functions";
 
@@ -72,6 +77,13 @@ export function useIslamicEventsAdmin() {
   return useQuery({
     queryKey: ["islamic_events_admin"],
     queryFn: listIslamicEventsAdmin,
+  });
+}
+
+export function useIslamicEventDatesAdmin() {
+  return useQuery({
+    queryKey: ["islamic_events_admin", "dates"],
+    queryFn: listIslamicEventDatesAdmin,
   });
 }
 
