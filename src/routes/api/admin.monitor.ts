@@ -24,7 +24,7 @@ function readDisk() {
       used: formatSize(used),
       total: formatSize(total),
       status,
-      action: status === "ok" ? null : "Kosongkan ruang storan Pi",
+      action: status === "ok" ? null : "Free up storage space on the Pi",
     };
   } catch {
     return undefined;
@@ -53,7 +53,7 @@ function readClock() {
     return {
       ntp_synced: synced,
       status,
-      message: synced ? "Disegerakkan dengan pelayan masa" : "Tidak disegerakkan. Semak sambungan internet",
+      message: synced ? "Synced with the time server" : "Not synced. Check the internet connection",
     };
   } catch {
     return undefined;
