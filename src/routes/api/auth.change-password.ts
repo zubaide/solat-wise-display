@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/auth/change-password")({
           password_hash: string;
         };
         if (!bcrypt.compareSync(parsed.currentPassword, row.password_hash)) {
-          return new Response("Kata laluan semasa salah", { status: 401 });
+          return new Response("Current password is incorrect", { status: 401 });
         }
         const hash = bcrypt.hashSync(parsed.newPassword, 10);
         db()
