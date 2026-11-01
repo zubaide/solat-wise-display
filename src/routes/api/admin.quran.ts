@@ -21,7 +21,7 @@ function loadQuran(): Map<string, string> {
     if (m) verses.set(`${m[1]}:${m[2]}`, m[3].trim());
   }
   if (verses.size !== TOTAL_AYAT) {
-    throw new Error(`quran-uthmani.txt has ${verses.size} ayat, expected ${TOTAL_AYAT}`);
+    throw new Error(`quran-uthmani.txt has ${verses.size} verses, expected ${TOTAL_AYAT}`);
   }
   cache = verses;
   return verses;
@@ -49,9 +49,9 @@ export const Route = createFileRoute("/api/admin/quran")({
           surah <= 114 &&
           from >= 1 &&
           to >= from;
-        if (!valid) return new Response("Rujukan tidak sah", { status: 400 });
+        if (!valid) return new Response("Invalid reference", { status: 400 });
         if (to - from + 1 > MAX_AYAT) {
-          return new Response(`Maksimum ${MAX_AYAT} ayat sekali ambil`, { status: 400 });
+          return new Response(`Maximum ${MAX_AYAT} verses per fetch`, { status: 400 });
         }
         if (!existsSync(QURAN_FILE)) {
           return new Response("data/quran/quran-uthmani.txt not found", { status: 500 });
@@ -68,13 +68,13 @@ export const Route = createFileRoute("/api/admin/quran")({
         const parts: string[] = [];
         for (let n = from; n <= to; n++) {
           const text = verses.get(`${surah}:${n}`);
-          if (!text) return new Response(`Ayat ${surah}:${n} tidak dijumpai`, { status: 404 });
+          if (!text) return new Response(`Verse ${surah}:${n} not found`, { status: 404 });
           parts.push(isRange ? `${text} ${AYAH_END}${arabicDigits(n)}` : text);
         }
 
         const joined = parts.join(" ");
         if (joined.length > MAX_CHARS) {
-          return new Response("Teks terlalu panjang untuk satu slaid", { status: 400 });
+          return new Response("Text is too long for one slide", { status: 400 });
         }
         const ref = isRange ? `${surah}:${from}-${to}` : `${surah}:${from}`;
         return Response.json({ text: joined, ref });
