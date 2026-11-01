@@ -8,12 +8,12 @@ export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Admin Dashboard — Jam Solat" },
-      { name: "description", content: "Urus tetapan masjid, pengumuman, dan slaid paparan." },
+      { name: "description", content: "Manage mosque settings, announcements, and display slides." },
     ],
   }),
   component: AdminLayout,
   errorComponent: ({ error }) => <p className="p-8 text-center">{error.message}</p>,
-  notFoundComponent: () => <p className="p-8 text-center">Halaman tidak ditemui.</p>,
+  notFoundComponent: () => <p className="p-8 text-center">Page not found.</p>,
 });
 
 function AdminLayout() {
@@ -38,7 +38,7 @@ function AdminLayout() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Mengesahkan sesi...
+        Verifying session...
       </div>
     );
   }
@@ -46,10 +46,10 @@ function AdminLayout() {
   if (!isAdmin) return null;
 
   const navItems = [
-    { to: "/admin", label: "Tetapan", icon: Settings, exact: true },
-    { to: "/admin/announcements", label: "Pengumuman", icon: Megaphone },
-    { to: "/admin/slideshow", label: "Slaid", icon: Images },
-    { to: "/admin/takwim", label: "Takwim Islam", icon: Calendar },
+    { to: "/admin", label: "Settings", icon: Settings, exact: true },
+    { to: "/admin/announcements", label: "Announcements", icon: Megaphone },
+    { to: "/admin/slideshow", label: "Slides", icon: Images },
+    { to: "/admin/takwim", label: "Islamic Calendar", icon: Calendar },
   ];
 
   return (
@@ -57,13 +57,13 @@ function AdminLayout() {
       <header className="border-b border-gold/30 bg-surface-1/80 px-6 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-display text-xl font-bold text-gold">Admin Masjid</span>
+            <span className="font-display text-xl font-bold text-gold">Mosque Admin</span>
             <Link
               to="/"
               className="ml-4 inline-flex items-center gap-2 rounded-lg bg-gradient-gold px-4 py-2 text-sm font-semibold text-primary-foreground shadow-elegant"
             >
               <Monitor className="h-4 w-4" />
-              Paparan TV
+              TV Display
             </Link>
           </div>
           <div className="flex items-center gap-3 text-sm">
