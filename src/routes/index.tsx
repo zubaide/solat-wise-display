@@ -9,6 +9,7 @@ import { Ticker } from "@/components/display/Ticker";
 import { IqamahOverlay } from "@/components/display/IqamahOverlay";
 import { IslamicEventSlide } from "@/components/display/IslamicEventSlide";
 import { useDisplay, useRealtimeDisplay, useIslamicEvents } from "@/lib/display-data";
+import { klToday } from "@/lib/islamic-events.functions";
 import type { SlideshowImage } from "@/lib/display-data";
 
 export const Route = createFileRoute("/")({
@@ -45,9 +46,11 @@ function Index() {
 
   const handleSlide = useCallback((s: SlideshowImage | null) => setActiveSlide(s), []);
 
+  const today = klToday();
+
   const activeIslamicEvents = useMemo(
-    () => (islamicEvents ?? []).filter((e) => e.is_active),
-    [islamicEvents],
+    () => (islamicEvents ?? []).filter((e) => e.is_active && e.date >= today),
+    [islamicEvents, today],
   );
 
   const activeEventsRef = useRef(activeIslamicEvents);
