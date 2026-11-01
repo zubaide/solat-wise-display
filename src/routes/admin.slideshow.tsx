@@ -95,7 +95,7 @@ function refLabel(ref: string) {
 }
 
 function slideLabel(s: SlideRow) {
-  return s.title || s.translation || s.quran_ref || "(slaid teks)";
+  return s.title || s.translation || s.quran_ref || "(text slide)";
 }
 
 async function uploadImage(file: File): Promise<string | null> {
@@ -103,7 +103,7 @@ async function uploadImage(file: File): Promise<string | null> {
   fd.append("file", file);
   const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
   if (!res.ok) {
-    toast.error("Muat naik gagal");
+    toast.error("Upload failed");
     return null;
   }
   const j = (await res.json()) as { url: string };
@@ -197,9 +197,9 @@ function TextFields({
       const res = await lookupQuran({ data: { surah, from: f, to: t } });
       setFetched(res);
       set({ arabic_text: res.text, quran_ref: res.ref });
-      toast.success("Teks Tanzil dimuatkan");
+      toast.success("Tanzil text loaded");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Ralat");
+      toast.error(e instanceof Error ? e.message : "Error");
     }
   };
 
@@ -210,12 +210,12 @@ function TextFields({
     <div className="space-y-4">
       <div className="space-y-2">
         <SizeRow
-          label="Baris 1 · Tajuk"
+          label="Line 1 · Title"
           value={values.title_size}
           onChange={(v) => set({ title_size: v })}
         />
         <Input
-          placeholder="cth. Doa Hari Ini"
+          placeholder="e.g. Daily Dua"
           value={values.title}
           onChange={(e) => set({ title: e.target.value })}
         />
@@ -223,7 +223,7 @@ function TextFields({
 
       <div className="space-y-2">
         <SizeRow
-          label="Baris 2 · Al-Quran"
+          label="Line 2 · Quran"
           value={values.arabic_size}
           onChange={(v) => set({ arabic_size: v })}
         />
@@ -237,13 +237,13 @@ function TextFields({
             >
               {SURAHS.map(([name, count], i) => (
                 <option key={name} value={i + 1}>
-                  {`${i + 1}. ${name} (${count} ayat)`}
+                  {`${i + 1}. ${name} (${count} verses)`}
                 </option>
               ))}
             </select>
           </div>
           <div className="w-24">
-            <Label className="text-xs">Dari ayat</Label>
+            <Label className="text-xs">From verse</Label>
             <Input
               type="number"
               min={1}
@@ -253,7 +253,7 @@ function TextFields({
             />
           </div>
           <div className="w-24">
-            <Label className="text-xs">Hingga ayat</Label>
+            <Label className="text-xs">To verse</Label>
             <Input
               type="number"
               min={1}
@@ -263,7 +263,7 @@ function TextFields({
             />
           </div>
           <Button type="button" variant="secondary" onClick={fetchQuran}>
-            Ambil dari Tanzil
+            Fetch from Tanzil
           </Button>
         </div>
         <textarea
@@ -276,32 +276,32 @@ function TextFields({
           onChange={(e) => onArabicChange(e.target.value)}
         />
         <p className="text-xs text-muted-foreground">
-          {values.quran_ref && <>Rujukan: {refLabel(values.quran_ref)}. </>}
-          Maksimum 10 ayat sekali ambil. Sumber teks:{" "}
+          {values.quran_ref && <>Reference: {refLabel(values.quran_ref)}. </>}
+          Maximum 10 verses per fetch. Text source:{" "}
           <a href="https://tanzil.net" target="_blank" rel="noreferrer" className="underline">
             Tanzil Project (tanzil.net)
           </a>
-          . Jika menampal sendiri, tampal hanya dari sumber yang sahih.
+          . If pasting manually, paste only from a trusted source.
         </p>
       </div>
 
       <div className="space-y-2">
         <SizeRow
-          label="Baris 3 · Terjemahan"
+          label="Line 3 · Translation"
           value={values.translation_size}
           onChange={(v) => set({ translation_size: v })}
         />
         <textarea
           rows={3}
           className={TEXTAREA_CLASS}
-          placeholder="Terjemahan (Bahasa Melayu atau English)"
+          placeholder="Translation (Malay or English)"
           value={values.translation}
           onChange={(e) => set({ translation: e.target.value })}
         />
       </div>
 
       <div className="space-y-1">
-        <Label className="text-xs">Latar belakang (pilihan — kosong = biru gelap)</Label>
+        <Label className="text-xs">Background (optional — empty = dark blue)</Label>
         <Input
           type="file"
           accept="image/*"
@@ -311,19 +311,19 @@ function TextFields({
             const u = await uploadImage(f);
             if (u) {
               set({ image_url: u });
-              toast.success("Latar dimuat naik");
+              toast.success("Background uploaded");
             }
           }}
         />
         {values.image_url && (
           <Button type="button" size="sm" variant="ghost" onClick={() => set({ image_url: "" })}>
-            Buang latar
+            Remove background
           </Button>
         )}
       </div>
 
       <div className="space-y-1">
-        <Label className="text-xs">Pratonton</Label>
+        <Label className="text-xs">Preview</Label>
         <PreviewBox slide={values} />
       </div>
     </div>
@@ -363,7 +363,7 @@ function SlideshowPage() {
         setCaption("");
       } else {
         if (!hasText(textValues)) {
-          toast.error("Isi sekurang-kurangnya satu baris");
+          toast.error("Fill in at least one line");
           return;
         }
         await addSlide({
@@ -378,26 +378,26 @@ function SlideshowPage() {
         setTextValues(EMPTY_TEXT);
         setFormKey((k) => k + 1);
       }
-      toast.success("Slaid ditambah");
+      toast.success("Slide added");
       refetch();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Ralat");
+      toast.error(e instanceof Error ? e.message : "Error");
     }
   };
 
   const saveEdit = async () => {
     if (!editing) return;
     if (!hasText(editing.values)) {
-      toast.error("Isi sekurang-kurangnya satu baris");
+      toast.error("Fill in at least one line");
       return;
     }
     try {
       await updateSlide({ data: { id: editing.id, ...textPayload(editing.values) } });
       setEditing(null);
-      toast.success("Slaid dikemas kini");
+      toast.success("Slide updated");
       refetch();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Ralat");
+      toast.error(e instanceof Error ? e.message : "Error");
     }
   };
 
@@ -411,7 +411,7 @@ function SlideshowPage() {
       await updateSlide({ data: { id, ...patch } });
       refetch();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Ralat");
+      toast.error(e instanceof Error ? e.message : "Error");
     }
   };
 
@@ -426,11 +426,11 @@ function SlideshowPage() {
       <QuranFontFace />
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Slaid Paparan</h1>
+          <h1 className="text-2xl font-bold">Display Slides</h1>
           <p className="text-sm text-muted-foreground">
-            Slaid aktif dipaparkan berputar sebagai latar TV. Slaid boleh berupa gambar atau teks
-            (doa / hadis). Tetapkan tempoh setiap slaid dan sama ada header (nama masjid) atau
-            footer (jam &amp; pengumuman) ditunjukkan semasa slaid itu.
+            Active slides rotate as the TV background. A slide can be a photo or a text slide
+            (dua / hadith). Set the duration of each slide, and whether the header (mosque name) or
+            footer (clock &amp; announcements) is shown during it.
           </p>
         </div>
 
@@ -441,14 +441,14 @@ function SlideshowPage() {
               variant={slideType === "photo" ? "default" : "outline"}
               onClick={() => setSlideType("photo")}
             >
-              Gambar
+              Photo
             </Button>
             <Button
               type="button"
               variant={slideType === "text" ? "default" : "outline"}
               onClick={() => setSlideType("text")}
             >
-              Teks (Doa / Hadis)
+              Text (Dua / Hadith)
             </Button>
           </div>
 
@@ -463,17 +463,17 @@ function SlideshowPage() {
                   const u = await uploadImage(f);
                   if (u) {
                     setUrl(u);
-                    toast.success("Imej dimuat naik — tekan Tambah Slaid");
+                    toast.success("Image uploaded — press Add Slide");
                   }
                 }}
               />
               <Input
-                placeholder="atau URL imej"
+                placeholder="or image URL"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
               />
               <Input
-                placeholder="Kapsyen (pilihan)"
+                placeholder="Caption (optional)"
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
               />
@@ -484,7 +484,7 @@ function SlideshowPage() {
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <Label className="text-xs">Tempoh (saat)</Label>
+              <Label className="text-xs">Duration (seconds)</Label>
               <Input
                 type="number"
                 min={2}
@@ -494,18 +494,18 @@ function SlideshowPage() {
             </div>
             <div className="flex items-end gap-2">
               <Switch checked={showHeader} onCheckedChange={setShowHeader} />
-              <Label className="text-xs">Tunjuk Header</Label>
+              <Label className="text-xs">Show Header</Label>
             </div>
             <div className="flex items-end gap-2">
               <Switch checked={showFooter} onCheckedChange={setShowFooter} />
-              <Label className="text-xs">Tunjuk Footer</Label>
+              <Label className="text-xs">Show Footer</Label>
             </div>
           </div>
-          <Button onClick={add}>Tambah Slaid</Button>
+          <Button onClick={add}>Add Slide</Button>
         </div>
 
         {isLoading ? (
-          <p>Memuatkan...</p>
+          <p>Loading...</p>
         ) : (
           <div className="grid grid-cols-2 gap-4">
             {data?.map((s) => {
@@ -526,9 +526,9 @@ function SlideshowPage() {
                         onChange={(v) => setEditing({ id: editing.id, values: v })}
                       />
                       <div className="flex gap-2">
-                        <Button onClick={saveEdit}>Simpan</Button>
+                        <Button onClick={saveEdit}>Save</Button>
                         <Button variant="outline" onClick={() => setEditing(null)}>
-                          Batal
+                          Cancel
                         </Button>
                       </div>
                     </div>
@@ -551,7 +551,7 @@ function SlideshowPage() {
                           ) : (
                             <Input
                               defaultValue={s.caption ?? ""}
-                              placeholder="Kapsyen (pilihan)"
+                              placeholder="Caption (optional)"
                               className="h-8 flex-1 text-sm"
                               onBlur={(e) => {
                                 const v = e.target.value.trim();
@@ -579,21 +579,21 @@ function SlideshowPage() {
                           <div className="space-y-2">
                             {s.title && (
                               <SizeRow
-                                label="Saiz tajuk"
+                                label="Title size"
                                 value={s.title_size}
                                 onChange={(v) => updateField(s.id, { title_size: v })}
                               />
                             )}
                             {s.arabic_text && (
                               <SizeRow
-                                label="Saiz Al-Quran"
+                                label="Quran size"
                                 value={s.arabic_size}
                                 onChange={(v) => updateField(s.id, { arabic_size: v })}
                               />
                             )}
                             {s.translation && (
                               <SizeRow
-                                label="Saiz terjemahan"
+                                label="Translation size"
                                 value={s.translation_size}
                                 onChange={(v) => updateField(s.id, { translation_size: v })}
                               />
@@ -603,7 +603,7 @@ function SlideshowPage() {
 
                         <div className="grid grid-cols-3 items-center gap-2 text-xs">
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Tempoh (s)</Label>
+                            <Label className="text-[10px] text-muted-foreground">Duration (s)</Label>
                             <Input
                               type="number"
                               min={2}
@@ -638,7 +638,7 @@ function SlideshowPage() {
               );
             })}
             {data?.length === 0 && (
-              <p className="col-span-2 text-sm text-muted-foreground">Tiada slaid lagi.</p>
+              <p className="col-span-2 text-sm text-muted-foreground">No slides yet.</p>
             )}
           </div>
         )}
