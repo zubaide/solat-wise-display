@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { updateIslamicEvent } from "@/lib/islamic-events.functions";
+import { updateIslamicEvent, formatDateShort, formatHijriLabel } from "@/lib/islamic-events.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ interface EventForm {
   background_url: string;
   custom_text: string;
   hari_ini_message: string;
+  duration_seconds: number;
   is_active: boolean;
 }
 
@@ -42,6 +43,7 @@ function TakwimPage() {
               background_url: e.background_url,
               custom_text: e.custom_text,
               hari_ini_message: e.hari_ini_message,
+              duration_seconds: e.duration_seconds,
               is_active: e.is_active,
             },
           ]),
@@ -57,13 +59,21 @@ function TakwimPage() {
   const saveEvent = async (id: string) => {
     const ef = eventForms[id];
     if (!ef) return;
+    if (!ef.date) {
+      toast.error("Please choose a date");
+      return;
+    }
+    if (!Number.isInteger(ef.duration_seconds) || ef.duration_seconds < 5 || ef.duration_seconds > 300) {
+      toast.error("Slide duration must be a whole number from 5 to 300 seconds");
+      return;
+    }
     setEventSaving((s) => ({ ...s, [id]: true }));
     try {
       await updateIslamicEvent(id, ef);
-      toast.success("Acara disimpan");
+      toast.success("Event saved");
       refetch();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Ralat");
+      toast.error(e instanceof Error ? e.message : "Error");
     } finally {
       setEventSaving((s) => ({ ...s, [id]: false }));
     }
@@ -78,22 +88,22 @@ function TakwimPage() {
       if (!res.ok) throw new Error(await res.text());
       const { url } = await res.json();
       updateEventField(id, "background_url", url);
-      toast.success("Gambar berjaya dimuat naik");
+      toast.success("Image uploaded");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Ralat muat naik");
+      toast.error(e instanceof Error ? e.message : "Upload error");
     } finally {
       setEventUploading((u) => ({ ...u, [id]: false }));
     }
   };
 
-  if (isLoading) return <p className="text-muted-foreground text-sm">Memuatkan acara...</p>;
+  if (isLoading) return <p className="text-muted-foreground text-sm">Loading events...</p>;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Takwim Islam</h1>
+        <h1 className="text-2xl font-bold">Islamic Calendar</h1>
         <p className="text-sm text-muted-foreground">
-          Slide acara Islam akan muncul secara automatik di TV. Kemaskini tarikh apabila ada pengumuman rasmi.
+          Islamic event slides appear automatically on the TV. Update the date when an official announcement is made.
         </p>
       </div>
 
@@ -115,7 +125,7 @@ function TakwimPage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="font-semibold text-foreground">{event.name}</h3>
-                  <span className="text-xs text-gold">{event.hijri_label} H</span>
+                  <span className="text-xs text-gold">{formatHijriLabel(event, ef.date)}</span>
                   {event.is_subject_to_announcement && (
                     <span className={[
                       "text-xs px-2 py-0.5 rounded border",
@@ -123,12 +133,12 @@ function TakwimPage() {
                         ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                         : "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
                     ].join(" ")}>
-                      {ef.date_confirmed ? "Tarikh Disahkan" : "Menunggu Pengumuman"}
+                      {ef.date_confirmed ? "Date Confirmed" : "Awaiting Announcement"}
                     </span>
                   )}
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer flex-shrink-0">
-                  <span className="text-xs text-muted-foreground">Aktif</span>
+                  <span className="text-xs text-muted-foreground">Active</span>
                   <input type="checkbox" checked={ef.is_active}
                     onChange={(e) => updateEventField(event.id, "is_active", e.target.checked)}
                     className="h-4 w-4 rounded" />
@@ -136,46 +146,61 @@ function TakwimPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className={event.is_subject_to_announcement ? "" : "col-span-2"}>
-                  <Label className="text-xs">Tarikh (YYYY-MM-DD)</Label>
+                <div>
+                  <Label className="text-xs">Date (DD-MMM-YYYY)</Label>
+                  <div className="flex items-center gap-3">
+                    <Input
+                      type="date"
+                      className="min-w-0 flex-1"
+                      value={ef.date}
+                      onChange={(e) => updateEventField(event.id, "date", e.target.value)}
+                    />
+                    <span className="text-sm font-semibold text-gold whitespace-nowrap">
+                      {formatDateShort(ef.date)}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs">Slide Duration (seconds, 5 to 300)</Label>
                   <Input
-                    type="date"
-                    value={ef.date}
-                    onChange={(e) => updateEventField(event.id, "date", e.target.value)}
+                    type="number"
+                    min={5}
+                    max={300}
+                    value={ef.duration_seconds}
+                    onChange={(e) => updateEventField(event.id, "duration_seconds", Number(e.target.value))}
                   />
                 </div>
-                {event.is_subject_to_announcement && (
-                  <div className="flex items-end pb-0.5">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={ef.date_confirmed}
-                        onChange={(e) => updateEventField(event.id, "date_confirmed", e.target.checked)}
-                        className="h-4 w-4 rounded" />
-                      <span className="text-sm">Tarikh Disahkan Rasmi</span>
-                    </label>
-                  </div>
-                )}
               </div>
 
+              {event.is_subject_to_announcement && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={ef.date_confirmed}
+                    onChange={(e) => updateEventField(event.id, "date_confirmed", e.target.checked)}
+                    className="h-4 w-4 rounded" />
+                  <span className="text-sm">Date Officially Confirmed</span>
+                </label>
+              )}
+
               <div>
-                <Label className="text-xs">Teks Kiraan Hari (ditunjukkan semasa kira undur)</Label>
+                <Label className="text-xs">Countdown Text (shown during the countdown)</Label>
                 <Input
                   value={ef.custom_text}
                   onChange={(e) => updateEventField(event.id, "custom_text", e.target.value)}
-                  placeholder="cth: Ahlan wa Sahlan ya Ramadan"
+                  placeholder="e.g. Ahlan wa Sahlan ya Ramadan"
                 />
               </div>
 
               <div>
-                <Label className="text-xs">Mesej Hari Ini (ditunjukkan pada hari acara)</Label>
+                <Label className="text-xs">Event Day Message (shown on the day of the event)</Label>
                 <Input
                   value={ef.hari_ini_message}
                   onChange={(e) => updateEventField(event.id, "hari_ini_message", e.target.value)}
-                  placeholder="cth: Selamat Menyambut Awal Ramadan"
+                  placeholder="e.g. Selamat Menyambut Awal Ramadan"
                 />
               </div>
 
               <div>
-                <Label className="text-xs">Gambar Latar Belakang</Label>
+                <Label className="text-xs">Background Image</Label>
                 <div className="mt-1 flex items-center gap-3 flex-wrap">
                   {ef.background_url ? (
                     <div className="relative h-14 w-24 rounded overflow-hidden border border-input flex-shrink-0">
@@ -183,21 +208,21 @@ function TakwimPage() {
                     </div>
                   ) : (
                     <div className="h-14 w-24 rounded border border-input bg-background flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs text-muted-foreground">Lalai</span>
+                      <span className="text-xs text-muted-foreground">Default</span>
                     </div>
                   )}
                   <div className="flex flex-col gap-1.5">
                     <Button type="button" variant="outline" size="sm" disabled={isUploading}
                       onClick={() => eventFileRefs.current[event.id]?.click()}>
-                      {isUploading ? "Memuat naik..." : "Muat Naik Gambar"}
+                      {isUploading ? "Uploading..." : "Upload Image"}
                     </Button>
                     {ef.background_url && (
                       <Button type="button" variant="ghost" size="sm"
                         onClick={() => updateEventField(event.id, "background_url", "")}>
-                        Buang (guna latar lalai)
+                        Remove (use default background)
                       </Button>
                     )}
-                    <p className="text-xs text-muted-foreground">JPG / PNG · 1920×1080px · maks 5MB</p>
+                    <p className="text-xs text-muted-foreground">JPG / PNG · 1920×1080px · max 5MB</p>
                   </div>
                   <input
                     ref={(el) => { eventFileRefs.current[event.id] = el; }}
@@ -212,7 +237,7 @@ function TakwimPage() {
               </div>
 
               <Button size="sm" onClick={() => saveEvent(event.id)} disabled={isSaving}>
-                {isSaving ? "Menyimpan..." : "Simpan Acara Ini"}
+                {isSaving ? "Saving..." : "Save This Event"}
               </Button>
             </div>
           );
