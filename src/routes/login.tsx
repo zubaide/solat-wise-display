@@ -10,8 +10,8 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Log Masuk Admin — Jam Solat" },
-      { name: "description", content: "Log masuk admin Sistem Paparan Waktu Solat." },
+      { title: "Admin Login — Jam Solat" },
+      { name: "description", content: "Admin login for the Prayer Time Display System." },
     ],
   }),
   component: LoginPage,
@@ -31,10 +31,10 @@ function LoginPage() {
     try {
       await login({ data: { password } });
       await refresh();
-      toast.success("Berjaya log masuk");
+      toast.success("Logged in successfully");
       navigate({ to: "/admin" });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Ralat tidak diketahui");
+      toast.error(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -43,23 +43,23 @@ function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <div className="w-full max-w-md rounded-2xl border border-gold/20 bg-surface-1/80 p-8 shadow-elegant">
-        <h1 className="mb-2 font-display text-3xl font-bold text-gold">Admin Masjid</h1>
-        <p className="mb-6 text-sm text-muted-foreground">Log masuk untuk uruskan paparan.</p>
+        <h1 className="mb-2 font-display text-3xl font-bold text-gold">Mosque Admin</h1>
+        <p className="mb-6 text-sm text-muted-foreground">Log in to manage the display.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="password">Kata Laluan Admin</Label>
+            <Label htmlFor="password">Admin Password</Label>
             <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoFocus />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "..." : "Log Masuk"}
+            {loading ? "..." : "Log In"}
           </Button>
         </form>
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          Kata laluan lalai (jika baru pasang): <code>admin1234</code>
+          Default password (fresh install): <code>admin1234</code>
         </p>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          <Link to="/" className="hover:text-gold">← Kembali ke paparan</Link>
+          <Link to="/" className="hover:text-gold">← Back to display</Link>
         </p>
       </div>
     </div>
