@@ -1,12 +1,10 @@
 # Rebuild guide: Surau Seri Tijanni prayer display
-
 Raspberry Pi 3 Model B, Raspberry Pi OS (Trixie, labwc desktop), user `sst`, hostname `suraust`.
-Written from the working setup on 2026-10-29; text-slide steps added 2026-10-31. The full sequence has not been run end to end on a fresh card, so fix any step that fails and update this file.
+Written from the working setup on 2026-10-29; text-slide steps added 2026-10-31; Islamic event dates table added 2026-11-02. The full sequence has not been run end to end on a fresh card, so fix any step that fails and update this file.
 
 Not held in git: the database and uploads (private repo `zubaide/solat-wise-data`, which also holds the Hafs font because it sits in uploads), the GitHub token, and the Tailscale login.
 
 ## 1. System
-
 - Flash Raspberry Pi OS with desktop, create user `sst`, hostname `suraust`.
 - Desktop autologin: `sudo raspi-config nonint do_boot_behaviour B4`
 - SSH: `sudo systemctl enable --now ssh`
@@ -14,7 +12,7 @@ Not held in git: the database and uploads (private repo `zubaide/solat-wise-data
 
 ## 2. Node 24 and the code
 
-~~bash
+~bash
 curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt install -y nodejs build-essential python3 git
 git config --global user.name "zubaide"
@@ -22,28 +20,28 @@ git config --global user.email "YOUR_EMAIL"
 git config --global credential.helper store
 git clone https://github.com/zubaide/solat-wise-display.git ~/solat-wise-display
 cd ~/solat-wise-display && npm install
-~~
+~
 
 Check the database driver:
 
-~~bash
+~bash
 node -e 'const D=require("better-sqlite3");console.log(new D(":memory:").prepare("select sqlite_version() v").get())'
-~~
+~
 
 If it says "Could not locate the bindings file", npm 11 skipped the install script:
 
-~~bash
+~bash
 npm install-scripts approve better-sqlite3 && npm rebuild better-sqlite3
-~~
+~
 
 ## 3. Data
 
-~~bash
+~bash
 git clone https://github.com/zubaide/solat-wise-data.git ~/solat-wise-data
 mkdir -p ~/solat-wise-display/data/uploads
 cp ~/solat-wise-data/mosque.db ~/solat-wise-display/data/mosque.db
 cp -a ~/solat-wise-data/uploads/. ~/solat-wise-display/data/uploads/
-~~
+~
 
 Cloning the private repo asks for a login: username `zubaide` and a GitHub token with Contents read and write on both repos.
 Without a backup, the first start creates an empty database with the admin password `admin1234`. Change it at once (step 9).
@@ -52,9 +50,9 @@ Without a backup, the first start creates an empty database with the admin passw
 
 The Quran text is in git at `data/quran/quran-uthmani.txt` (Tanzil, full Uthmani type). Check it:
 
-~~bash
+~bash
 cd ~/solat-wise-display && grep -c '^[0-9]*|[0-9]*|' data/quran/quran-uthmani.txt
-~~
+~
 
 It prints 6236, one line per verse. Keep the Tanzil notice at the bottom of that file, because the terms require it. If you ever replace the file, download the Uthmani type (not "Uthmani Minimal") from tanzil.net/download, in the text format with verse numbers.
 
@@ -62,19 +60,33 @@ The TV slide shows no Tanzil credit. The admin text form carries the source link
 
 The font is in uploads, so the restore above brings it back as `data/uploads/KFGQPC-Hafs-V30.ttf`. If it is missing, download KFGQPC Uthmanic Script HAFS from the King Fahd Complex font site (fonts.qurancomplex.gov.sa), use it unmodified, and check its name:
 
-~~bash
+~bash
 fc-scan --format "%{family} | %{fullname}\n" ~/solat-wise-display/data/uploads/KFGQPC-Hafs-V30.ttf
-~~
+~
 
 Expect "KFGQPC HAFS Uthmanic Script" (the word order can differ by version). The Complex has other fonts with similar names (Naskh, Kufi, Alphabet Dotted) that are not the right one. A different file name needs the `FONT_URL` line in `src/components/display/QuranFontFace.tsx` edited. The font is kept out of the code repo because its license reserves reproduction and modification to the Complex.
+
+### Islamic event dates
+
+The dates of the eight Islamic events are in the table `islamic_event_dates` (one row per event and date, with a Confirmed flag). They are in `mosque.db`, so the restore above brings them back. Manage them at `/admin/takwim`.
+
+How the TV uses them:
+- The eight events are one yearly set, in order from Israk dan Mikraj to Maulidur Rasul, which is the last event.
+- The TV shows each event's next date, but only up to the next Maulidur Rasul date. An event that has passed does not jump to next year's date.
+- The next set starts one calendar month after the Maulidur Rasul date. During that month the TV shows no Islamic events.
+- If the table has no upcoming Maulidur Rasul date, the TV shows no Islamic events. The admin page shows a status line for this, and a warning when the set after the current one has no Maulidur Rasul date.
+
+Each year, before Maulidur Rasul, add the next set's dates from JAKIM's "Tarikh Penting" list (e-solat.gov.my, siteId 24, pageId 52). Dates marked * in that list wait for the official announcement: Awal Ramadan, Aidilfitri and Aidiladha. Leave them unconfirmed until the announcement, then switch Confirmed on. If the announced date differs, delete the row and add the right date.
+
+Without a backup, the first start creates the eight events with placeholder 2026 dates and copies them into the table. Those dates have passed, so the TV shows no Islamic events until you enter the current set. A database made before this table existed gets the table on the first start, with each event's old date copied in once.
 
 ## 4. Prayer times
 
 The 2026 file for SGR01 is already in the code repo. For another zone or year:
 
-~~bash
+~bash
 cd ~/solat-wise-display && node scripts/fetch-prayer-times.ts SGR01 2027
-~~
+~
 
 Without a file for today's date the display shows made-up fallback times. JAKIM publishes the next year late, and Selangor zones may change in 2027, so check e-solat.gov.my in December.
 
@@ -82,7 +94,7 @@ Without a file for today's date the display shows made-up fallback times. JAKIM 
 
 Check the npm path with `command -v npm` (expected `/usr/bin/npm`).
 
-~~bash
+~bash
 sudo tee /etc/systemd/system/seritijanni.service > /dev/null << 'EOF'
 [Unit]
 Description=Surau Seri Tijanni prayer display
@@ -100,19 +112,19 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 sudo systemctl daemon-reload && sudo systemctl enable --now seritijanni.service
-~~
+~
 
 Vite needs about 30 seconds to start. Test: `curl -s -o /dev/null -w "%{http_code}\n" localhost:8080/api/data/settings` prints 200.
 Logs: `journalctl -u seritijanni.service -f`
 
 ## 6. Kiosk screen
 
-~~bash
+~bash
 mkdir -p ~/.config/labwc && cat > ~/.config/labwc/autostart << 'EOF'
 /usr/bin/kanshi &
 (until curl -sf -o /dev/null http://localhost:8080/api/data/settings; do sleep 2; done; /usr/bin/lwrespawn /usr/bin/chromium --kiosk --noerrdialogs --disable-infobars --no-first-run --disable-session-crashed-bubble --password-store=basic --ozone-platform=wayland --autoplay-policy=no-user-gesture-required http://localhost:8080/) &
 EOF
-~~
+~
 
 This replaces the system autostart, so there is no taskbar or desktop. To get the normal desktop back, rename the file to `autostart.off` and reboot.
 
@@ -120,18 +132,18 @@ This replaces the system autostart, so there is no taskbar or desktop. To get th
 
 Delete the old `sst` device in the Tailscale admin console first, so the new one can take the name.
 
-~~bash
+~bash
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up --hostname=sst
 sudo tailscale funnel --bg 8080
-~~
+~
 
 Address: https://sst.tail852be3.ts.net
 `vite.config.ts` allows the host `.tail852be3.ts.net`. A different tailnet needs that edited, or Vite answers "Blocked request".
 
 ## 8. Nightly backup
 
-~~bash
+~bash
 sudo tee /etc/systemd/system/seritijanni-backup.service > /dev/null << 'EOF'
 [Unit]
 Description=Back up Surau Seri Tijanni data to GitHub
@@ -156,13 +168,13 @@ RandomizedDelaySec=300
 WantedBy=timers.target
 EOF
 sudo systemctl daemon-reload && sudo systemctl enable --now seritijanni-backup.timer
-~~
+~
 
 Test the push path: `touch ~/solat-wise-display/data/uploads/.keep && sudo systemctl start seritijanni-backup.service`, then `journalctl -u seritijanni-backup.service -n 5 --no-pager` should end with "Backup pushed".
 
 ## 9. Admin password
 
-~~bash
+~bash
 cd ~/solat-wise-display && read -rsp "New admin password: " NEWPW && echo && NEWPW="$NEWPW" node -e '
 const D=require("better-sqlite3"),b=require("bcryptjs");
 const pw=process.env.NEWPW||"";
@@ -170,7 +182,7 @@ if(pw.length<10){console.log("Too short (min 10 characters), nothing changed");p
 const d=new D("data/mosque.db");
 const r=d.prepare("UPDATE admin SET password_hash=?, updated_at=CURRENT_TIMESTAMP WHERE id=1").run(b.hashSync(pw,10));
 console.log("rows changed:",r.changes)'; unset NEWPW
-~~
+~
 
 ## 10. Checks
 
@@ -180,6 +192,7 @@ console.log("rows changed:",r.changes)'; unset NEWPW
 - The Funnel address opens from a phone on mobile data.
 - Zone and times: the display shows real times, not fallback ones (`curl -s localhost:8080/api/data/display | grep -o '"source":"[a-z]*"'` prints local).
 - Text slides: in `/admin/slideshow` choose the text type, pick Al-Baqarah, set both ayat boxes to 255 and press "Ambil dari Tanzil". The preview shows the Arabic in the Hafs font with the small marks in place. A plain fallback font means the font file is missing or misnamed. A range such as 285 to 286 ends each ayah with its number marker.
+- Islamic events: `/admin/takwim` shows a status line above the dates table, and `curl -s localhost:8080/api/data/islamic-events` lists the events of the current set. An empty list (`[]`) means no set is showing right now, either because of the one-month gap or because no upcoming dates are entered.
 
 ## Gotchas learned
 
@@ -192,5 +205,7 @@ console.log("rows changed:",r.changes)'; unset NEWPW
 - Text slides live in the `slideshow_images` table. `migrateDb()` adds their columns at start, and the background of a text slide is its `image_url`.
 - The Quran line is read by `src/routes/api/admin.quran.ts` from `data/quran/quran-uthmani.txt`. It refuses to run unless the file has 6236 verses, takes at most 10 ayat per lookup, and in a range ends each ayah with a verse-end marker and its number.
 - `src/lib/surahs.ts` holds the surah names and ayat counts for the dropdown. The counts were checked against the Tanzil file.
+- `islamic_event_dates` is created by `migrateDb()` in `src/server/db.server.ts` when it is missing, and filled from the events' `date` column only that once. Deleting rows never brings them back. The `date` and `date_confirmed` columns on `islamic_events` are no longer read by the TV or the admin page.
+- The yearly set rule and the one-month gap live in `getIslamicWindow()` in `src/server/db.server.ts`. The last event of the set is the one with the highest `sort_order`.
 - `.env` is not tracked and not needed: the app reads no Supabase settings, so a fresh clone runs without one. The code repo is public, so never commit `.env`, the database, uploads or tokens.
 - `docs/PI_SETUP.md` is from the old setup and is out of date.
