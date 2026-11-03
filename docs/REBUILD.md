@@ -1,6 +1,6 @@
 # Rebuild guide: Surau Seri Tijanni prayer display
 Raspberry Pi 3 Model B, Raspberry Pi OS (Trixie, labwc desktop), user `sst`, hostname `suraust`.
-Written from the working setup on 2026-10-29; text-slide steps added 2026-10-31; Islamic event dates table added 2026-11-02. The full sequence has not been run end to end on a fresh card, so fix any step that fails and update this file.
+Written from the working setup on 2026-10-29; text-slide steps added 2026-10-31; Islamic event dates table added 2026-11-02; kuliah slides added 2026-11-03. The full sequence has not been run end to end on a fresh card, so fix any step that fails and update this file.
 
 Not held in git: the database and uploads (private repo `zubaide/solat-wise-data`, which also holds the Hafs font because it sits in uploads), the GitHub token, and the Tailscale login.
 
@@ -79,6 +79,18 @@ How the TV uses them:
 Each year, before Maulidur Rasul, add the next set's dates from JAKIM's "Tarikh Penting" list (e-solat.gov.my, siteId 24, pageId 52). Dates marked * in that list wait for the official announcement: Awal Ramadan, Aidilfitri and Aidiladha. Leave them unconfirmed until the announcement, then switch Confirmed on. If the announced date differs, delete the row and add the right date.
 
 Without a backup, the first start creates the eight events with placeholder 2026 dates and copies them into the table. Those dates have passed, so the TV shows no Islamic events until you enter the current set. A database made before this table existed gets the table on the first start, with each event's old date copied in once.
+
+### Kuliah
+
+The kuliah schedule is in the table `kuliah` (title, speaker, speaker photo, date, time text, background, seconds, active flag). It is in `mosque.db`, so the restore above brings it back, and the speaker photos and backgrounds come back with the uploads. Manage them at `/admin/kuliah`.
+
+How the TV uses them:
+- After each full slideshow cycle the TV plays the kuliah one by one, each for its own number of seconds (5 to 300), then the Islamic event slides, then the slideshow starts again.
+- Only active kuliah dated today or later are played. A kuliah dated today is hidden once the Isyak black screen has ended: the Isyak time plus the Isyak iqamah minutes plus the blackout seconds from the settings. If the Isyak iqamah is 0, it is hidden at the Isyak time.
+- With no kuliah to show, nothing plays and the TV goes straight to the Islamic event slides.
+- During the black screen at each prayer nothing shows, kuliah included.
+
+Without a backup, the first start creates the kuliah table empty. A database made before it existed gets the table, with its `speaker_photo_url` column, on the first start.
 
 ## 4. Prayer times
 
@@ -193,6 +205,7 @@ console.log("rows changed:",r.changes)'; unset NEWPW
 - Zone and times: the display shows real times, not fallback ones (`curl -s localhost:8080/api/data/display | grep -o '"source":"[a-z]*"'` prints local).
 - Text slides: in `/admin/slideshow` choose the text type, pick Al-Baqarah, set both ayat boxes to 255 and press "Ambil dari Tanzil". The preview shows the Arabic in the Hafs font with the small marks in place. A plain fallback font means the font file is missing or misnamed. A range such as 285 to 286 ends each ayah with its number marker.
 - Islamic events: `/admin/takwim` shows a status line above the dates table, and `curl -s localhost:8080/api/data/islamic-events` lists the events of the current set. An empty list (`[]`) means no set is showing right now, either because of the one-month gap or because no upcoming dates are entered.
+- Kuliah: in `/admin/kuliah` add a kuliah dated today with a short slide time and a speaker photo, and `curl -s localhost:8080/api/data/kuliah` lists it. After the next slideshow cycle the TV plays it before the Islamic event slides. Delete the test kuliah afterwards.
 
 ## Gotchas learned
 
@@ -207,5 +220,7 @@ console.log("rows changed:",r.changes)'; unset NEWPW
 - `src/lib/surahs.ts` holds the surah names and ayat counts for the dropdown. The counts were checked against the Tanzil file.
 - `islamic_event_dates` is created by `migrateDb()` in `src/server/db.server.ts` when it is missing, and filled from the events' `date` column only that once. Deleting rows never brings them back. The `date` and `date_confirmed` columns on `islamic_events` are no longer read by the TV or the admin page.
 - The yearly set rule and the one-month gap live in `getIslamicWindow()` in `src/server/db.server.ts`. The last event of the set is the one with the highest `sort_order`.
+- The `kuliah` table is created by `migrateDb()` in `src/server/db.server.ts`, and the `speaker_photo_url` column is added there by a try/catch `ALTER TABLE`. `/api/data/kuliah` returns only active kuliah dated today or later; the Isyak cutoff for today's kuliah is applied on the TV in `src/routes/index.tsx`.
+- The slide order (slideshow, kuliah, Islamic events) is the `slidePhase` state in `src/routes/index.tsx`. `getKuliahCutoff()` in `src/lib/kuliah.functions.ts` copies the end-of-blackout timing from `IqamahOverlay.tsx`, so change both together if that timing ever changes.
 - `.env` is not tracked and not needed: the app reads no Supabase settings, so a fresh clone runs without one. The code repo is public, so never commit `.env`, the database, uploads or tokens.
 - `docs/PI_SETUP.md` is from the old setup and is out of date.
