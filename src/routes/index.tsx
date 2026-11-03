@@ -8,9 +8,13 @@ import { DigitalClock } from "@/components/display/DigitalClock";
 import { Ticker } from "@/components/display/Ticker";
 import { IqamahOverlay } from "@/components/display/IqamahOverlay";
 import { IslamicEventSlide } from "@/components/display/IslamicEventSlide";
-import { useDisplay, useRealtimeDisplay, useIslamicEvents } from "@/lib/display-data";
+import { KuliahSlide } from "@/components/display/KuliahSlide";
+import { useDisplay, useRealtimeDisplay, useIslamicEvents, useKuliah } from "@/lib/display-data";
 import { klToday } from "@/lib/islamic-events.functions";
+import { getKuliahCutoff, getVisibleKuliah } from "@/lib/kuliah.functions";
 import type { SlideshowImage } from "@/lib/display-data";
+
+type SlidePhase = { phase: "kuliah" | "islamic"; idx: number } | null;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -36,25 +40,45 @@ function Index() {
   useRealtimeDisplay();
   const { data: display, isLoading } = useDisplay();
   const { data: islamicEvents } = useIslamicEvents();
+  const { data: kuliahRows } = useKuliah();
 
   const [now, setNow] = useState(() => new Date());
   const [activeSlide, setActiveSlide] = useState<SlideshowImage | null>(null);
-  const [islamicSlideState, setIslamicSlideState] = useState<{
-    active: boolean;
-    eventIdx: number;
-  }>({ active: false, eventIdx: 0 });
+  const [slidePhase, setSlidePhase] = useState<SlidePhase>(null);
 
   const handleSlide = useCallback((s: SlideshowImage | null) => setActiveSlide(s), []);
 
   const today = klToday();
+  const data = display?.prayer;
+  const settings = display?.settings;
 
   const activeIslamicEvents = useMemo(
     () => (islamicEvents ?? []).filter((e) => e.is_active && e.date >= today),
     [islamicEvents, today],
   );
 
+  const kuliahCutoff = useMemo(
+    () =>
+      data && settings
+        ? getKuliahCutoff(
+            data.isyak,
+            Number(settings.iqamah_isyak ?? 0),
+            Number(settings.blackout_seconds ?? 120),
+          )
+        : null,
+    [data, settings, today],
+  );
+
+  const visibleKuliah = useMemo(
+    () => getVisibleKuliah(kuliahRows ?? [], today, now, kuliahCutoff),
+    [kuliahRows, today, now, kuliahCutoff],
+  );
+
   const activeEventsRef = useRef(activeIslamicEvents);
   activeEventsRef.current = activeIslamicEvents;
+
+  const visibleKuliahRef = useRef(visibleKuliah);
+  visibleKuliahRef.current = visibleKuliah;
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
@@ -62,27 +86,42 @@ function Index() {
   }, []);
 
   const handleCycleComplete = useCallback(() => {
-    if (!activeEventsRef.current.length) return;
-    setIslamicSlideState({ active: true, eventIdx: 0 });
+    if (visibleKuliahRef.current.length) {
+      setSlidePhase({ phase: "kuliah", idx: 0 });
+    } else if (activeEventsRef.current.length) {
+      setSlidePhase({ phase: "islamic", idx: 0 });
+    }
+  }, []);
+
+  const advanceSlide = useCallback(() => {
+    setSlidePhase((cur) => {
+      if (!cur) return null;
+      const nextIdx = cur.idx + 1;
+      if (cur.phase === "kuliah") {
+        if (nextIdx < visibleKuliahRef.current.length) return { phase: "kuliah", idx: nextIdx };
+        if (activeEventsRef.current.length) return { phase: "islamic", idx: 0 };
+        return null;
+      }
+      if (nextIdx < activeEventsRef.current.length) return { phase: "islamic", idx: nextIdx };
+      return null;
+    });
   }, []);
 
   useEffect(() => {
-    if (!islamicSlideState.active) return;
-    const event = activeEventsRef.current[islamicSlideState.eventIdx];
-    const dur = (event?.duration_seconds ?? 20) * 1000;
-    const id = setTimeout(() => {
-      const nextIdx = islamicSlideState.eventIdx + 1;
-      if (nextIdx >= activeEventsRef.current.length) {
-        setIslamicSlideState({ active: false, eventIdx: 0 });
-      } else {
-        setIslamicSlideState({ active: true, eventIdx: nextIdx });
-      }
-    }, dur);
+    if (!slidePhase) return;
+    const list = slidePhase.phase === "kuliah" ? visibleKuliahRef.current : activeEventsRef.current;
+    const item = list[slidePhase.idx];
+    const dur = (item?.duration_seconds ?? 20) * 1000;
+    const id = setTimeout(advanceSlide, dur);
     return () => clearTimeout(id);
-  }, [islamicSlideState]);
+  }, [slidePhase, advanceSlide]);
 
-  const data = display?.prayer;
-  const settings = display?.settings;
+  useEffect(() => {
+    if (!slidePhase) return;
+    const list = slidePhase.phase === "kuliah" ? visibleKuliah : activeIslamicEvents;
+    if (!list[slidePhase.idx]) advanceSlide();
+  }, [slidePhase, visibleKuliah, activeIslamicEvents, advanceSlide]);
+
   const announcements = display?.announcements;
   const slides = display?.slides;
 
@@ -118,13 +157,15 @@ function Index() {
   const showHeader = activeSlide ? activeSlide.show_header : true;
   const showFooter = activeSlide ? activeSlide.show_footer : true;
 
-  const currentIslamicEvent = islamicSlideState.active
-    ? (activeIslamicEvents[islamicSlideState.eventIdx] ?? null)
-    : null;
+  const currentKuliah =
+    slidePhase?.phase === "kuliah" ? (visibleKuliah[slidePhase.idx] ?? null) : null;
+  const currentIslamicEvent =
+    slidePhase?.phase === "islamic" ? (activeIslamicEvents[slidePhase.idx] ?? null) : null;
 
   return (
     <div className="flex h-screen min-h-screen w-full flex-col overflow-hidden bg-background text-foreground">
       {data && settings && <IqamahOverlay times={data} settings={settings} />}
+      {currentKuliah && <KuliahSlide kuliah={currentKuliah} />}
       {currentIslamicEvent && <IslamicEventSlide event={currentIslamicEvent} />}
       {next && showHeader && (
         <TopBar
@@ -140,7 +181,7 @@ function Index() {
           slides={slides ?? []}
           onSlideChange={handleSlide}
           onCycleComplete={handleCycleComplete}
-          paused={islamicSlideState.active}
+          paused={slidePhase !== null}
         />
       </main>
       {showFooter && (

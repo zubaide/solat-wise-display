@@ -301,6 +301,25 @@ export const mapIslamicEventDate = (r: RawIslamicEventDate): IslamicEventDateRow
   date_confirmed: !!r.date_confirmed,
 });
 
+export interface KuliahRow {
+  id: string;
+  title: string;
+  speaker: string;
+  speaker_photo_url: string;
+  date: string;
+  time_text: string;
+  background_url: string;
+  duration_seconds: number;
+  is_active: boolean;
+}
+
+type RawKuliah = Omit<KuliahRow, "is_active"> & { is_active: number };
+
+export const mapKuliah = (r: RawKuliah): KuliahRow => ({
+  ...r,
+  is_active: !!r.is_active,
+});
+
 export interface AnnouncementRow {
   id: string;
   message: string;
@@ -465,6 +484,27 @@ export function listIslamicEventDates(): IslamicEventDateRow[] {
   ).map(mapIslamicEventDate);
 }
 
+const KULIAH_COLUMNS =
+  "id, title, speaker, speaker_photo_url, date, time_text, background_url, duration_seconds, is_active";
+
+export function listKuliahAdmin(): KuliahRow[] {
+  return (
+    db()
+      .prepare(`SELECT ${KULIAH_COLUMNS} FROM kuliah ORDER BY date, rowid`)
+      .all() as RawKuliah[]
+  ).map(mapKuliah);
+}
+
+export function listKuliahUpcoming(today: string): KuliahRow[] {
+  return (
+    db()
+      .prepare(
+        `SELECT ${KULIAH_COLUMNS} FROM kuliah WHERE is_active = 1 AND date >= ? ORDER BY date, rowid`,
+      )
+      .all(today) as RawKuliah[]
+  ).map(mapKuliah);
+}
+
 function migrateIslamicEventDates(d: Database.Database) {
   const exists = d
     .prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'islamic_event_dates'")
@@ -523,4 +563,21 @@ function migrateDb(d: Database.Database) {
   } catch (e) {
     console.error("islamic_event_dates migration failed:", e);
   }
+  try {
+    d.exec(`
+      CREATE TABLE IF NOT EXISTS kuliah (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        speaker TEXT NOT NULL DEFAULT '',
+        date TEXT NOT NULL,
+        time_text TEXT NOT NULL DEFAULT '',
+        background_url TEXT NOT NULL DEFAULT '',
+        duration_seconds INTEGER NOT NULL DEFAULT 20,
+        is_active INTEGER NOT NULL DEFAULT 1
+      );
+    `);
+  } catch (e) {
+    console.error("kuliah migration failed:", e);
+  }
+  try { d.exec("ALTER TABLE kuliah ADD COLUMN speaker_photo_url TEXT NOT NULL DEFAULT ''"); } catch {}
 }

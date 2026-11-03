@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tan
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Megaphone, Images, Calendar, Monitor } from "lucide-react";
+import { LogOut, Settings, Megaphone, Images, Calendar, Monitor, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -49,6 +49,7 @@ function AdminLayout() {
     { to: "/admin", label: "Settings", icon: Settings, exact: true },
     { to: "/admin/announcements", label: "Announcements", icon: Megaphone },
     { to: "/admin/slideshow", label: "Slides", icon: Images },
+    { to: "/admin/kuliah", label: "Kuliah", icon: BookOpen },
     { to: "/admin/takwim", label: "Islamic Calendar", icon: Calendar },
   ];
 

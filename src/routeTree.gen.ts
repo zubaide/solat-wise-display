@@ -16,6 +16,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ApiEventsRouteImport } from './routes/api/events'
 import { Route as AdminTakwimRouteImport } from './routes/admin.takwim'
 import { Route as AdminSlideshowRouteImport } from './routes/admin.slideshow'
+import { Route as AdminKuliahRouteImport } from './routes/admin.kuliah'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as ApiUploadsSplatRouteImport } from './routes/api/uploads.$'
 import { Route as ApiDataSlidesRouteImport } from './routes/api/data.slides'
@@ -23,6 +24,7 @@ import { Route as ApiDataSettingsRouteImport } from './routes/api/data.settings'
 import { Route as ApiDataPrayerTimesRouteImport } from './routes/api/data.prayer-times'
 import { Route as ApiDataPrayerLibraryRouteImport } from './routes/api/data.prayer-library'
 import { Route as ApiDataOnlineRouteImport } from './routes/api/data.online'
+import { Route as ApiDataKuliahRouteImport } from './routes/api/data.kuliah'
 import { Route as ApiDataIslamicEventsRouteImport } from './routes/api/data.islamic-events'
 import { Route as ApiDataDisplayRouteImport } from './routes/api/data.display'
 import { Route as ApiDataAnnouncementsRouteImport } from './routes/api/data.announcements'
@@ -37,6 +39,7 @@ import { Route as ApiAdminQuranRouteImport } from './routes/api/admin.quran'
 import { Route as ApiAdminPrayerTimesRouteImport } from './routes/api/admin.prayer-times'
 import { Route as ApiAdminPowerRouteImport } from './routes/api/admin.power'
 import { Route as ApiAdminMonitorRouteImport } from './routes/api/admin.monitor'
+import { Route as ApiAdminKuliahRouteImport } from './routes/api/admin.kuliah'
 import { Route as ApiAdminIslamicEventsRouteImport } from './routes/api/admin.islamic-events'
 import { Route as ApiAdminIslamicEventDatesRouteImport } from './routes/api/admin.islamic-event-dates'
 import { Route as ApiAdminAnnouncementsRouteImport } from './routes/api/admin.announcements'
@@ -76,6 +79,11 @@ const AdminSlideshowRoute = AdminSlideshowRouteImport.update({
   path: '/slideshow',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminKuliahRoute = AdminKuliahRouteImport.update({
+  id: '/kuliah',
+  path: '/kuliah',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
   id: '/announcements',
   path: '/announcements',
@@ -109,6 +117,11 @@ const ApiDataPrayerLibraryRoute = ApiDataPrayerLibraryRouteImport.update({
 const ApiDataOnlineRoute = ApiDataOnlineRouteImport.update({
   id: '/api/data/online',
   path: '/api/data/online',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDataKuliahRoute = ApiDataKuliahRouteImport.update({
+  id: '/api/data/kuliah',
+  path: '/api/data/kuliah',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiDataIslamicEventsRoute = ApiDataIslamicEventsRouteImport.update({
@@ -181,6 +194,11 @@ const ApiAdminMonitorRoute = ApiAdminMonitorRouteImport.update({
   path: '/api/admin/monitor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminKuliahRoute = ApiAdminKuliahRouteImport.update({
+  id: '/api/admin/kuliah',
+  path: '/api/admin/kuliah',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminIslamicEventsRoute = ApiAdminIslamicEventsRouteImport.update({
   id: '/api/admin/islamic-events',
   path: '/api/admin/islamic-events',
@@ -203,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/kuliah': typeof AdminKuliahRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
   '/admin/takwim': typeof AdminTakwimRoute
   '/api/events': typeof ApiEventsRoute
@@ -210,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
   '/api/admin/islamic-event-dates': typeof ApiAdminIslamicEventDatesRoute
   '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
+  '/api/admin/kuliah': typeof ApiAdminKuliahRoute
   '/api/admin/monitor': typeof ApiAdminMonitorRoute
   '/api/admin/power': typeof ApiAdminPowerRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
@@ -224,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/api/data/announcements': typeof ApiDataAnnouncementsRoute
   '/api/data/display': typeof ApiDataDisplayRoute
   '/api/data/islamic-events': typeof ApiDataIslamicEventsRoute
+  '/api/data/kuliah': typeof ApiDataKuliahRoute
   '/api/data/online': typeof ApiDataOnlineRoute
   '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
   '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
@@ -235,6 +256,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/kuliah': typeof AdminKuliahRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
   '/admin/takwim': typeof AdminTakwimRoute
   '/api/events': typeof ApiEventsRoute
@@ -242,6 +264,7 @@ export interface FileRoutesByTo {
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
   '/api/admin/islamic-event-dates': typeof ApiAdminIslamicEventDatesRoute
   '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
+  '/api/admin/kuliah': typeof ApiAdminKuliahRoute
   '/api/admin/monitor': typeof ApiAdminMonitorRoute
   '/api/admin/power': typeof ApiAdminPowerRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
@@ -256,6 +279,7 @@ export interface FileRoutesByTo {
   '/api/data/announcements': typeof ApiDataAnnouncementsRoute
   '/api/data/display': typeof ApiDataDisplayRoute
   '/api/data/islamic-events': typeof ApiDataIslamicEventsRoute
+  '/api/data/kuliah': typeof ApiDataKuliahRoute
   '/api/data/online': typeof ApiDataOnlineRoute
   '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
   '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
@@ -269,6 +293,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/kuliah': typeof AdminKuliahRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
   '/admin/takwim': typeof AdminTakwimRoute
   '/api/events': typeof ApiEventsRoute
@@ -276,6 +301,7 @@ export interface FileRoutesById {
   '/api/admin/announcements': typeof ApiAdminAnnouncementsRoute
   '/api/admin/islamic-event-dates': typeof ApiAdminIslamicEventDatesRoute
   '/api/admin/islamic-events': typeof ApiAdminIslamicEventsRoute
+  '/api/admin/kuliah': typeof ApiAdminKuliahRoute
   '/api/admin/monitor': typeof ApiAdminMonitorRoute
   '/api/admin/power': typeof ApiAdminPowerRoute
   '/api/admin/prayer-times': typeof ApiAdminPrayerTimesRoute
@@ -290,6 +316,7 @@ export interface FileRoutesById {
   '/api/data/announcements': typeof ApiDataAnnouncementsRoute
   '/api/data/display': typeof ApiDataDisplayRoute
   '/api/data/islamic-events': typeof ApiDataIslamicEventsRoute
+  '/api/data/kuliah': typeof ApiDataKuliahRoute
   '/api/data/online': typeof ApiDataOnlineRoute
   '/api/data/prayer-library': typeof ApiDataPrayerLibraryRoute
   '/api/data/prayer-times': typeof ApiDataPrayerTimesRoute
@@ -304,6 +331,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/admin/announcements'
+    | '/admin/kuliah'
     | '/admin/slideshow'
     | '/admin/takwim'
     | '/api/events'
@@ -311,6 +339,7 @@ export interface FileRouteTypes {
     | '/api/admin/announcements'
     | '/api/admin/islamic-event-dates'
     | '/api/admin/islamic-events'
+    | '/api/admin/kuliah'
     | '/api/admin/monitor'
     | '/api/admin/power'
     | '/api/admin/prayer-times'
@@ -325,6 +354,7 @@ export interface FileRouteTypes {
     | '/api/data/announcements'
     | '/api/data/display'
     | '/api/data/islamic-events'
+    | '/api/data/kuliah'
     | '/api/data/online'
     | '/api/data/prayer-library'
     | '/api/data/prayer-times'
@@ -336,6 +366,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/admin/announcements'
+    | '/admin/kuliah'
     | '/admin/slideshow'
     | '/admin/takwim'
     | '/api/events'
@@ -343,6 +374,7 @@ export interface FileRouteTypes {
     | '/api/admin/announcements'
     | '/api/admin/islamic-event-dates'
     | '/api/admin/islamic-events'
+    | '/api/admin/kuliah'
     | '/api/admin/monitor'
     | '/api/admin/power'
     | '/api/admin/prayer-times'
@@ -357,6 +389,7 @@ export interface FileRouteTypes {
     | '/api/data/announcements'
     | '/api/data/display'
     | '/api/data/islamic-events'
+    | '/api/data/kuliah'
     | '/api/data/online'
     | '/api/data/prayer-library'
     | '/api/data/prayer-times'
@@ -369,6 +402,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/admin/announcements'
+    | '/admin/kuliah'
     | '/admin/slideshow'
     | '/admin/takwim'
     | '/api/events'
@@ -376,6 +410,7 @@ export interface FileRouteTypes {
     | '/api/admin/announcements'
     | '/api/admin/islamic-event-dates'
     | '/api/admin/islamic-events'
+    | '/api/admin/kuliah'
     | '/api/admin/monitor'
     | '/api/admin/power'
     | '/api/admin/prayer-times'
@@ -390,6 +425,7 @@ export interface FileRouteTypes {
     | '/api/data/announcements'
     | '/api/data/display'
     | '/api/data/islamic-events'
+    | '/api/data/kuliah'
     | '/api/data/online'
     | '/api/data/prayer-library'
     | '/api/data/prayer-times'
@@ -406,6 +442,7 @@ export interface RootRouteChildren {
   ApiAdminAnnouncementsRoute: typeof ApiAdminAnnouncementsRoute
   ApiAdminIslamicEventDatesRoute: typeof ApiAdminIslamicEventDatesRoute
   ApiAdminIslamicEventsRoute: typeof ApiAdminIslamicEventsRoute
+  ApiAdminKuliahRoute: typeof ApiAdminKuliahRoute
   ApiAdminMonitorRoute: typeof ApiAdminMonitorRoute
   ApiAdminPowerRoute: typeof ApiAdminPowerRoute
   ApiAdminPrayerTimesRoute: typeof ApiAdminPrayerTimesRoute
@@ -420,6 +457,7 @@ export interface RootRouteChildren {
   ApiDataAnnouncementsRoute: typeof ApiDataAnnouncementsRoute
   ApiDataDisplayRoute: typeof ApiDataDisplayRoute
   ApiDataIslamicEventsRoute: typeof ApiDataIslamicEventsRoute
+  ApiDataKuliahRoute: typeof ApiDataKuliahRoute
   ApiDataOnlineRoute: typeof ApiDataOnlineRoute
   ApiDataPrayerLibraryRoute: typeof ApiDataPrayerLibraryRoute
   ApiDataPrayerTimesRoute: typeof ApiDataPrayerTimesRoute
@@ -479,6 +517,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSlideshowRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/kuliah': {
+      id: '/admin/kuliah'
+      path: '/kuliah'
+      fullPath: '/admin/kuliah'
+      preLoaderRoute: typeof AdminKuliahRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/announcements': {
       id: '/admin/announcements'
       path: '/announcements'
@@ -526,6 +571,13 @@ declare module '@tanstack/react-router' {
       path: '/api/data/online'
       fullPath: '/api/data/online'
       preLoaderRoute: typeof ApiDataOnlineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/data/kuliah': {
+      id: '/api/data/kuliah'
+      path: '/api/data/kuliah'
+      fullPath: '/api/data/kuliah'
+      preLoaderRoute: typeof ApiDataKuliahRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/data/islamic-events': {
@@ -626,6 +678,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminMonitorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/kuliah': {
+      id: '/api/admin/kuliah'
+      path: '/api/admin/kuliah'
+      fullPath: '/api/admin/kuliah'
+      preLoaderRoute: typeof ApiAdminKuliahRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/islamic-events': {
       id: '/api/admin/islamic-events'
       path: '/api/admin/islamic-events'
@@ -652,6 +711,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
+  AdminKuliahRoute: typeof AdminKuliahRoute
   AdminSlideshowRoute: typeof AdminSlideshowRoute
   AdminTakwimRoute: typeof AdminTakwimRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -659,6 +719,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
+  AdminKuliahRoute: AdminKuliahRoute,
   AdminSlideshowRoute: AdminSlideshowRoute,
   AdminTakwimRoute: AdminTakwimRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -674,6 +735,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminAnnouncementsRoute: ApiAdminAnnouncementsRoute,
   ApiAdminIslamicEventDatesRoute: ApiAdminIslamicEventDatesRoute,
   ApiAdminIslamicEventsRoute: ApiAdminIslamicEventsRoute,
+  ApiAdminKuliahRoute: ApiAdminKuliahRoute,
   ApiAdminMonitorRoute: ApiAdminMonitorRoute,
   ApiAdminPowerRoute: ApiAdminPowerRoute,
   ApiAdminPrayerTimesRoute: ApiAdminPrayerTimesRoute,
@@ -688,6 +750,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDataAnnouncementsRoute: ApiDataAnnouncementsRoute,
   ApiDataDisplayRoute: ApiDataDisplayRoute,
   ApiDataIslamicEventsRoute: ApiDataIslamicEventsRoute,
+  ApiDataKuliahRoute: ApiDataKuliahRoute,
   ApiDataOnlineRoute: ApiDataOnlineRoute,
   ApiDataPrayerLibraryRoute: ApiDataPrayerLibraryRoute,
   ApiDataPrayerTimesRoute: ApiDataPrayerTimesRoute,

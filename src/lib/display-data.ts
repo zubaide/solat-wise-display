@@ -8,13 +8,14 @@ import {
   listIslamicEventDatesAdmin,
   type IslamicEventRow,
 } from "@/lib/islamic-events.functions";
+import { listKuliah, listKuliahAdmin, type KuliahRow } from "@/lib/kuliah.functions";
 import type { SettingsRow } from "@/lib/settings.functions";
 import type { PrayerTimesPayload } from "@/lib/prayer.functions";
 
 export type MosqueSettings = SettingsRow;
 export type Announcement = AnnouncementRow;
 export type SlideshowImage = SlideRow;
-export type { IslamicEventRow };
+export type { IslamicEventRow, KuliahRow };
 
 export interface DisplayPayload {
   settings: SettingsRow;
@@ -87,6 +88,22 @@ export function useIslamicEventDatesAdmin() {
   });
 }
 
+export function useKuliah() {
+  return useQuery({
+    queryKey: ["kuliah"],
+    queryFn: listKuliah,
+    refetchInterval: 30 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+export function useKuliahAdmin() {
+  return useQuery({
+    queryKey: ["kuliah_admin"],
+    queryFn: listKuliahAdmin,
+  });
+}
+
 export function useRealtimeDisplay() {
   const qc = useQueryClient();
   useEffect(() => {
@@ -101,6 +118,9 @@ export function useRealtimeDisplay() {
       else if (e === "islamic_events") {
         qc.invalidateQueries({ queryKey: ["islamic_events"] });
         qc.invalidateQueries({ queryKey: ["islamic_events_admin"] });
+      } else if (e === "kuliah") {
+        qc.invalidateQueries({ queryKey: ["kuliah"] });
+        qc.invalidateQueries({ queryKey: ["kuliah_admin"] });
       }
     };
     return () => { es.close(); };
