@@ -29,6 +29,10 @@ export default defineConfig({
       port: 8080,
       strictPort: true,
       allowedHosts: [".tail852be3.ts.net"],
+      // Replacing deny drops Vite's defaults, so they are repeated here.
+      fs: {
+        deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/data/mosque.db*"],
+      },
     },
   },
 });
