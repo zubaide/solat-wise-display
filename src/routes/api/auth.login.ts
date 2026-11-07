@@ -8,6 +8,7 @@ const Body = z.object({ password: z.string().min(1).max(200) });
 
 const MAX_FAILURES = 5;
 const WINDOW_MS = 15 * 60 * 1000;
+const MAX_BODY_BYTES = 2048;
 let failures: number[] = [];
 
 function lockedForSeconds() {
@@ -17,13 +18,33 @@ function lockedForSeconds() {
   return Math.ceil((failures[0] + WINDOW_MS - now) / 1000);
 }
 
+async function readLimitedText(request: Request) {
+  const reader = request.body?.getReader();
+  if (!reader) return "";
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.length;
+    if (size > MAX_BODY_BYTES) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
 export const Route = createFileRoute("/api/auth/login")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const text = await readLimitedText(request);
+        if (text === null) return new Response("Too large", { status: 413 });
         let parsed;
         try {
-          parsed = Body.parse(await request.json());
+          parsed = Body.parse(JSON.parse(text));
         } catch {
           return new Response("Invalid body", { status: 400 });
         }
