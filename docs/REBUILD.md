@@ -1,13 +1,14 @@
 # Rebuild guide: Surau Seri Tijanni prayer display
 Raspberry Pi 3 Model B, Raspberry Pi OS (Trixie, labwc desktop), user `sst`, hostname `suraust`.
-Written from the working setup on 2026-10-29; text-slide steps added 2026-10-31; Islamic event dates table added 2026-11-02; kuliah slides added 2026-11-03. The full sequence has not been run end to end on a fresh card, so fix any step that fails and update this file.
+Written from the working setup on 2026-10-29; text-slide steps added 2026-10-31; Islamic event dates table added 2026-11-02; kuliah slides added 2026-11-03; security hardening added 2026-11-08. The full sequence has not been run end to end on a fresh card, so fix any step that fails and update this file.
 
-Not held in git: the database and uploads (private repo `zubaide/solat-wise-data`, which also holds the Hafs font because it sits in uploads), the GitHub token, and the Tailscale login.
+Not held in git: the database and uploads (private repo `zubaide/solat-wise-data`, which also holds the Hafs font because it sits in uploads), the GitHub token, the Tailscale login, and the session secret (`/etc/seritijanni.env`, step 5; a new card gets a new one, which only logs everyone out).
 
 ## 1. System
 - Flash Raspberry Pi OS with desktop, create user `sst`, hostname `suraust`.
 - Desktop autologin: `sudo raspi-config nonint do_boot_behaviour B4`
 - SSH: `sudo systemctl enable --now ssh`
+- Turn off rpcbind, which nothing here uses: `sudo systemctl disable --now rpcbind.service rpcbind.socket`
 - Keep the case cover off or fit a heatsink. In a closed case the CPU reached about 76 C and throttled; with the cover off it idled at 46-54 C.
 
 ## 2. Node 24 and the code
@@ -19,8 +20,10 @@ git config --global user.name "zubaide"
 git config --global user.email "YOUR_EMAIL"
 git config --global credential.helper store
 git clone https://github.com/zubaide/solat-wise-display.git ~/solat-wise-display
-cd ~/solat-wise-display && npm install
+cd ~/solat-wise-display && npm ci
 ~
+
+Use `npm ci`, not `npm install`: it installs exactly what `package-lock.json` pins (TanStack Start 1.168, Vite 7.3.7) and fails instead of changing it, while `npm install` may rewrite the lockfile, and the newest TanStack Start (1.169) needs Vite 8. npm may warn that esbuild has install scripts not covered by allowScripts; Vite runs fine without them.
 
 Check the database driver:
 
@@ -44,7 +47,7 @@ cp -a ~/solat-wise-data/uploads/. ~/solat-wise-display/data/uploads/
 ~
 
 Cloning the private repo asks for a login: username `zubaide` and a GitHub token with Contents read and write on both repos.
-Without a backup, the first start creates an empty database with the admin password `admin1234`. Change it at once (step 9).
+Without a backup, the first start creates an empty database with the admin password `admin1234`. Change it at once (step 9), before step 7 opens the Funnel.
 
 ### Quran text and font for text slides
 
@@ -106,6 +109,17 @@ Without a file for today's date the display shows made-up fallback times. JAKIM 
 
 Check the npm path with `command -v npm` (expected `/usr/bin/npm`).
 
+The session cookie is signed with `SESSION_SECRET`. Keep it out of the database and git: a root-only file, handed to the app by a systemd drop-in.
+
+~bash
+sudo install -m 600 -o root -g root /dev/null /etc/seritijanni.env
+echo "SESSION_SECRET=$(tr -dc 'a-f0-9' </dev/urandom | head -c 64)" | sudo tee /etc/seritijanni.env > /dev/null
+sudo mkdir -p /etc/systemd/system/seritijanni.service.d
+printf '[Service]\nEnvironmentFile=/etc/seritijanni.env\n' | sudo tee /etc/systemd/system/seritijanni.service.d/secret.conf > /dev/null
+~
+
+If this variable is missing, the app silently falls back to a secret stored in the database (`app_meta`), so confirm it in step 10.
+
 ~bash
 sudo tee /etc/systemd/system/seritijanni.service > /dev/null << 'EOF'
 [Unit]
@@ -142,6 +156,8 @@ This replaces the system autostart, so there is no taskbar or desktop. To get th
 
 ## 7. Remote access
 
+If the database is new, do step 9 first: the Funnel makes `/login` public, and the default password is `admin1234`.
+
 Delete the old `sst` device in the Tailscale admin console first, so the new one can take the name.
 
 ~bash
@@ -152,6 +168,7 @@ sudo tailscale funnel --bg 8080
 
 Address: https://sst.tail852be3.ts.net
 `vite.config.ts` allows the host `.tail852be3.ts.net`. A different tailnet needs that edited, or Vite answers "Blocked request".
+`vite.config.ts` also makes Vite listen on `127.0.0.1` only and blocks `data/mosque.db*` from the dev server's file serving (Vite's own deny list covers only `.env`, certificates and `.git`). Keep both. Because of the first, `http://<LAN IP>:8080` does not work: use the Funnel address for the admin pages, at home too. The Funnel and the kiosk both reach the app through localhost.
 
 ## 8. Nightly backup
 
@@ -206,11 +223,13 @@ console.log("rows changed:",r.changes)'; unset NEWPW
 - Text slides: in `/admin/slideshow` choose the text type, pick Al-Baqarah, set both ayat boxes to 255 and press "Ambil dari Tanzil". The preview shows the Arabic in the Hafs font with the small marks in place. A plain fallback font means the font file is missing or misnamed. A range such as 285 to 286 ends each ayah with its number marker.
 - Islamic events: `/admin/takwim` shows a status line above the dates table, and `curl -s localhost:8080/api/data/islamic-events` lists the events of the current set. An empty list (`[]`) means no set is showing right now, either because of the one-month gap or because no upcoming dates are entered.
 - Kuliah: in `/admin/kuliah` add a kuliah dated today with a short slide time and a speaker photo, and `curl -s localhost:8080/api/data/kuliah` lists it. After the next slideshow cycle the TV plays it before the Islamic event slides. Delete the test kuliah afterwards.
+- Security: `sudo ss -tln | grep ':8080'` shows `127.0.0.1:8080`, `sudo ss -tln | grep -c ':111 '` prints 0, and `curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8080/@fs/home/sst/solat-wise-display/data/mosque.db` prints 403.
+- Session secret: `tr '\0' '\n' < /proc/$(systemctl show -p MainPID --value seritijanni.service)/environ | grep -c '^SESSION_SECRET='` prints 1.
 
 ## Gotchas learned
 
-- A new or changed server route file needs `sudo systemctl restart seritijanni.service`.
-- The session cookie must not be `Secure`, because the display is served over plain http on the LAN (`src/server/session.server.ts`).
+- A new or changed server route file, or a change to `vite.config.ts`, needs `sudo systemctl restart seritijanni.service`.
+- The session cookie is not `Secure` (`src/server/session.server.ts`). It was set that way for plain http on the LAN; port 8080 now listens on localhost only, so the cookie travels over localhost or the Funnel's HTTPS.
 - JAKIM writes some months in Malay (Mac, Mei, Ogo, Okt, Dis); `src/server/prayer.server.ts` handles them.
 - JAKIM's API ignores a year in the URL. Use the date-range request in `scripts/fetch-prayer-times.ts`.
 - The Pi has about 900 MB of RAM. The dev server uses about 150 MB, and swap is compressed RAM (zram), not the SD card.
@@ -222,5 +241,9 @@ console.log("rows changed:",r.changes)'; unset NEWPW
 - The yearly set rule and the one-month gap live in `getIslamicWindow()` in `src/server/db.server.ts`. The last event of the set is the one with the highest `sort_order`.
 - The `kuliah` table is created by `migrateDb()` in `src/server/db.server.ts`, and the `speaker_photo_url` column is added there by a try/catch `ALTER TABLE`. `/api/data/kuliah` returns only active kuliah dated today or later; the Isyak cutoff for today's kuliah is applied on the TV in `src/routes/index.tsx`.
 - The slide order (slideshow, kuliah, Islamic events) is the `slidePhase` state in `src/routes/index.tsx`. `getKuliahCutoff()` in `src/lib/kuliah.functions.ts` copies the end-of-blackout timing from `IqamahOverlay.tsx`, so change both together if that timing ever changes.
-- `.env` is not tracked and not needed: the app reads no Supabase settings, so a fresh clone runs without one. The code repo is public, so never commit `.env`, the database, uploads or tokens.
+- `.env` is not tracked and not needed: the app reads no Supabase settings, so a fresh clone runs without one. The only secret the app needs is `SESSION_SECRET`, from `/etc/seritijanni.env` (step 5). The code repo is public, so never commit `.env`, the database, uploads or tokens.
+- Early commits in the public code repo hold copies of `mosque.db` (May and September 2026), so an admin password or session secret from before the November 2026 hardening counts as public. Both were replaced.
+- `src/routes/api/auth.login.ts` locks new logins for 15 minutes after 5 wrong passwords. The lock is global and kept in memory, so a restart clears it. The request body is capped at 2 KB.
+- Update packages by name (`npm update vite`). `npm audit fix` stops with ERESOLVE because TanStack Start 1.169 needs Vite 8, and `--force` would install a mismatched set. Moving to Vite 8 is a larger migration.
+- Every `admin.*` route in `src/routes/api` checks the session first and returns 401 without it. Do the same in any new one, and test it by calling it with no cookie.
 - `docs/PI_SETUP.md` is from the old setup and is out of date.
