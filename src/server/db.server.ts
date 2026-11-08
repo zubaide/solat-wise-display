@@ -580,4 +580,18 @@ function migrateDb(d: Database.Database) {
     console.error("kuliah migration failed:", e);
   }
   try { d.exec("ALTER TABLE kuliah ADD COLUMN speaker_photo_url TEXT NOT NULL DEFAULT ''"); } catch {}
+  try {
+    d.exec(`
+      CREATE TABLE IF NOT EXISTS admin_users (
+        id TEXT PRIMARY KEY,
+        username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'editor' CHECK (role IN ('admin', 'editor')),
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+    `);
+  } catch (e) {
+    console.error("admin_users migration failed:", e);
+  }
 }
