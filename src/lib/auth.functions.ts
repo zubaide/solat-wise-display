@@ -1,5 +1,7 @@
 // Thin client-side fetch wrappers — no server imports allowed here.
 
+export type Role = "admin" | "editor";
+
 async function jsonOrThrow(res: Response) {
   if (!res.ok) {
     const t = await res.text().catch(() => "");
@@ -8,11 +10,13 @@ async function jsonOrThrow(res: Response) {
   return res.json();
 }
 
-export async function me(): Promise<{ admin: boolean }> {
+export async function me(): Promise<{ admin: boolean; role: Role | null; username: string | null }> {
   return jsonOrThrow(await fetch("/api/auth/me"));
 }
 
-export async function login(args: { data: { password: string } }): Promise<{ ok: true }> {
+export async function login(args: {
+  data: { username?: string; password: string };
+}): Promise<{ ok: true }> {
   return jsonOrThrow(
     await fetch("/api/auth/login", {
       method: "POST",
