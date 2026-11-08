@@ -2,8 +2,13 @@ import { createMiddleware } from "@tanstack/react-start";
 import { useSession } from "@tanstack/react-start/server";
 import { getSessionSecret } from "./db.server";
 
+export type Role = "admin" | "editor";
+
 export interface SessionData {
   admin?: boolean;
+  role?: Role;
+  userId?: string;
+  username?: string;
   loggedInAt?: number;
 }
 
@@ -19,6 +24,10 @@ export async function getSession() {
 export async function getSessionData(_request: Request): Promise<SessionData> {
   const s = await getSession();
   return s.data ?? {};
+}
+
+export function isFullAdmin(data: SessionData | undefined) {
+  return !!data?.admin && (data.role ?? "admin") === "admin";
 }
 
 export const requireAdmin = createMiddleware().server(async ({ next }) => {
