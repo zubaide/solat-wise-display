@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { PRAYER_DIR } from "@/server/db.server";
-import { getSession } from "@/server/session.server";
+import { getSession, isFullAdmin } from "@/server/session.server";
 
 export const Route = createFileRoute("/api/admin/prayer-times")({
   server: {
@@ -10,6 +10,7 @@ export const Route = createFileRoute("/api/admin/prayer-times")({
       POST: async ({ request }) => {
         const s = await getSession();
         if (!s.data?.admin) return new Response("Unauthorized", { status: 401 });
+        if (!isFullAdmin(s.data)) return new Response("Forbidden", { status: 403 });
 
         const form = await request.formData();
         const zone = String(form.get("zone") ?? "").toUpperCase();

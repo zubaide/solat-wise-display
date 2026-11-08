@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { execFileSync } from "node:child_process";
 import { readFileSync, statfsSync } from "node:fs";
-import { getSessionData } from "@/server/session.server";
+import { getSessionData, isFullAdmin } from "@/server/session.server";
 
 type Level = "ok" | "warning" | "critical";
 
@@ -66,6 +66,7 @@ export const Route = createFileRoute("/api/admin/monitor")({
       GET: async ({ request }) => {
         const s = await getSessionData(request);
         if (!s.admin) return new Response("Unauthorized", { status: 401 });
+        if (!isFullAdmin(s)) return new Response("Forbidden", { status: 403 });
         const disk = readDisk();
         const temperature = readTemperature();
         const clock = readClock();

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { db } from "@/server/db.server";
-import { getSessionData } from "@/server/session.server";
+import { getSessionData, isFullAdmin } from "@/server/session.server";
 import { emit } from "@/server/events.server";
 
 const Body = z.object({
@@ -29,6 +29,7 @@ export const Route = createFileRoute("/api/admin/settings")({
       POST: async ({ request }) => {
         const s = await getSessionData(request);
         if (!s.admin) return new Response("Unauthorized", { status: 401 });
+        if (!isFullAdmin(s)) return new Response("Forbidden", { status: 403 });
         let parsed;
         try {
           parsed = Body.parse(await request.json());

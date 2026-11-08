@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { execFile } from "node:child_process";
 import { db } from "@/server/db.server";
-import { getSessionData } from "@/server/session.server";
+import { getSessionData, isFullAdmin } from "@/server/session.server";
 
 const Body = z.object({ action: z.enum(["shutdown", "restart"]) });
 const SYSTEMCTL = "/usr/bin/systemctl";
@@ -19,6 +19,7 @@ export const Route = createFileRoute("/api/admin/power")({
       POST: async ({ request }) => {
         const s = await getSessionData(request);
         if (!s.admin) return new Response("Unauthorized", { status: 401 });
+        if (!isFullAdmin(s)) return new Response("Forbidden", { status: 403 });
         let action: "shutdown" | "restart";
         try {
           action = Body.parse(await request.json()).action;
