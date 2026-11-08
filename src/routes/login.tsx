@@ -22,6 +22,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { refresh } = useAuth();
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +30,7 @@ function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login({ data: { password } });
+      await login({ data: { username: username.trim(), password } });
       await refresh();
       toast.success("Logged in successfully");
       navigate({ to: "/admin" });
@@ -47,16 +48,17 @@ function LoginPage() {
         <p className="mb-6 text-sm text-muted-foreground">Log in to manage the display.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="password">Admin Password</Label>
-            <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoFocus />
+            <Label htmlFor="username">Username</Label>
+            <Input id="username" required value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} autoFocus />
+          </div>
+          <div>
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "..." : "Log In"}
           </Button>
         </form>
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          Default password (fresh install): <code>admin1234</code>
-        </p>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           <Link to="/" className="hover:text-gold">← Back to display</Link>
