@@ -6,7 +6,12 @@ export const Route = createFileRoute("/api/auth/me")({
     handlers: {
       GET: async () => {
         const s = await getSession();
-        return Response.json({ admin: !!s.data?.admin });
+        const admin = !!s.data?.admin;
+        return Response.json({
+          admin,
+          role: admin ? (s.data?.role ?? "admin") : null,
+          username: admin ? (s.data?.username ?? null) : null,
+        });
       },
     },
   },
