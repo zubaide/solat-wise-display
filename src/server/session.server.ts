@@ -1,6 +1,6 @@
 import { createMiddleware } from "@tanstack/react-start";
 import { useSession } from "@tanstack/react-start/server";
-import { getSessionSecret } from "./db.server";
+import { db, getSessionSecret } from "./db.server";
 
 export type Role = "admin" | "editor";
 
@@ -12,13 +12,25 @@ export interface SessionData {
   loggedInAt?: number;
 }
 
+function accountStillValid(userId: string, loggedInAt: number) {
+  const row = db()
+    .prepare("SELECT strftime('%s', updated_at) * 1000 AS changed FROM admin_users WHERE id = ?")
+    .get(userId) as { changed: number } | undefined;
+  return !!row && row.changed <= loggedInAt;
+}
+
 export async function getSession() {
-  return useSession<SessionData>({
+  const s = await useSession<SessionData>({
     password: getSessionSecret(),
     name: "mosque-tv-session",
     maxAge: 60 * 60 * 24 * 30,
     cookie: { httpOnly: true, secure: false, sameSite: "lax", path: "/" },
   });
+  const userId = s.data?.userId;
+  if (userId && !accountStillValid(userId, s.data?.loggedInAt ?? 0)) {
+    await s.clear();
+  }
+  return s;
 }
 
 export async function getSessionData(_request: Request): Promise<SessionData> {
