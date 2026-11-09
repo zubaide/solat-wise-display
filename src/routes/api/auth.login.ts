@@ -5,7 +5,7 @@ import { db } from "@/server/db.server";
 import { getSession, type Role } from "@/server/session.server";
 
 const Body = z.object({
-  username: z.string().min(1).max(40).optional(),
+  username: z.string().min(1).max(40),
   password: z.string().min(1).max(200),
 });
 
@@ -83,8 +83,8 @@ export const Route = createFileRoute("/api/auth/login")({
         } catch {
           return new Response("Invalid body", { status: 400 });
         }
-        const username = parsed.username?.trim().toLowerCase();
-        const key = username ? `user:${username}` : "legacy";
+        const username = parsed.username.trim().toLowerCase();
+        const key = `user:${username}`;
         const wait = lockedForSeconds(key);
         if (wait > 0) {
           return new Response("Too many attempts", {
@@ -93,21 +93,11 @@ export const Route = createFileRoute("/api/auth/login")({
           });
         }
 
-        let account: AccountRow | undefined;
-        let hash: string | undefined;
-        if (username) {
-          account = db()
-            .prepare("SELECT id, username, password_hash, role FROM admin_users WHERE username = ?")
-            .get(username) as AccountRow | undefined;
-          hash = account?.password_hash;
-        } else {
-          const row = db().prepare("SELECT password_hash FROM admin WHERE id=1").get() as
-            | { password_hash: string }
-            | undefined;
-          hash = row?.password_hash;
-        }
-        const ok = bcrypt.compareSync(parsed.password, hash ?? DUMMY_HASH) && !!hash;
-        if (!ok) {
+        const account = db()
+          .prepare("SELECT id, username, password_hash, role FROM admin_users WHERE username = ?")
+          .get(username) as AccountRow | undefined;
+        const ok = bcrypt.compareSync(parsed.password, account?.password_hash ?? DUMMY_HASH) && !!account;
+        if (!ok || !account) {
           recordFailure(key);
           await new Promise((r) => setTimeout(r, 400));
           return new Response("Incorrect username or password", { status: 401 });
@@ -115,23 +105,13 @@ export const Route = createFileRoute("/api/auth/login")({
 
         accountFailures.delete(key);
         const s = await getSession();
-        if (account) {
-          await s.update({
-            admin: true,
-            role: account.role,
-            userId: account.id,
-            username: account.username,
-            loggedInAt: Date.now(),
-          });
-        } else {
-          await s.update({
-            admin: true,
-            role: "admin",
-            userId: undefined,
-            username: undefined,
-            loggedInAt: Date.now(),
-          });
-        }
+        await s.update({
+          admin: true,
+          role: account.role,
+          userId: account.id,
+          username: account.username,
+          loggedInAt: Date.now(),
+        });
         return Response.json({ ok: true });
       },
     },
