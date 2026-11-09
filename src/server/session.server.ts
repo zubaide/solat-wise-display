@@ -24,10 +24,11 @@ export async function getSession() {
     password: getSessionSecret(),
     name: "mosque-tv-session",
     maxAge: 60 * 60 * 24 * 30,
-    cookie: { httpOnly: true, secure: false, sameSite: "lax", path: "/" },
+    cookie: { httpOnly: true, secure: true, sameSite: "lax", path: "/" },
   });
   const userId = s.data?.userId;
-  if (userId && !accountStillValid(userId, s.data?.loggedInAt ?? 0)) {
+  const valid = !!userId && accountStillValid(userId, s.data?.loggedInAt ?? 0);
+  if ((userId || s.data?.admin) && !valid) {
     await s.clear();
   }
   return s;
@@ -39,7 +40,7 @@ export async function getSessionData(_request: Request): Promise<SessionData> {
 }
 
 export function isFullAdmin(data: SessionData | undefined) {
-  return !!data?.admin && (data.role ?? "admin") === "admin";
+  return !!data?.admin && data.role === "admin";
 }
 
 export const requireAdmin = createMiddleware().server(async ({ next }) => {
