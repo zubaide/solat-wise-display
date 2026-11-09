@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tan
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Megaphone, Images, Calendar, Monitor, BookOpen } from "lucide-react";
+import { LogOut, Settings, Megaphone, Images, Calendar, Monitor, BookOpen, User } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -17,10 +17,11 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const { isAdmin, loading, refresh, signOut } = useAuth();
+  const { isAdmin, role, username, loading, refresh, signOut } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const refreshed = useRef(false);
+  const onSettingsPage = pathname === "/admin" || pathname === "/admin/";
 
   useEffect(() => {
     if (!refreshed.current) {
@@ -35,6 +36,12 @@ function AdminLayout() {
     }
   }, [loading, isAdmin, navigate]);
 
+  useEffect(() => {
+    if (!loading && role === "editor" && onSettingsPage) {
+      navigate({ to: "/admin/announcements" });
+    }
+  }, [loading, role, onSettingsPage, navigate]);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center text-muted-foreground">
@@ -44,14 +51,16 @@ function AdminLayout() {
   }
 
   if (!isAdmin) return null;
+  if (role === "editor" && onSettingsPage) return null;
 
   const navItems = [
-    { to: "/admin", label: "Settings", icon: Settings, exact: true },
+    { to: "/admin", label: "Settings", icon: Settings, exact: true, adminOnly: true },
     { to: "/admin/announcements", label: "Announcements", icon: Megaphone },
     { to: "/admin/slideshow", label: "Slides", icon: Images },
     { to: "/admin/kuliah", label: "Kuliah", icon: BookOpen },
     { to: "/admin/takwim", label: "Islamic Calendar", icon: Calendar },
-  ];
+    { to: "/admin/account", label: "My account", icon: User },
+  ].filter((item) => !item.adminOnly || role === "admin");
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,7 +77,10 @@ function AdminLayout() {
             </Link>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="hidden text-muted-foreground sm:inline">Admin</span>
+            <span className="hidden text-muted-foreground sm:inline">
+              {username ?? "Admin"}
+              {role ? ` (${role})` : ""}
+            </span>
             <Button size="sm" variant="ghost" onClick={() => signOut().then(() => navigate({ to: "/login" }))}>
               <LogOut className="h-4 w-4" />
             </Button>

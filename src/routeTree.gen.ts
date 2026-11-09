@@ -18,6 +18,7 @@ import { Route as AdminTakwimRouteImport } from './routes/admin.takwim'
 import { Route as AdminSlideshowRouteImport } from './routes/admin.slideshow'
 import { Route as AdminKuliahRouteImport } from './routes/admin.kuliah'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
+import { Route as AdminAccountRouteImport } from './routes/admin.account'
 import { Route as ApiUploadsSplatRouteImport } from './routes/api/uploads.$'
 import { Route as ApiDataSlidesRouteImport } from './routes/api/data.slides'
 import { Route as ApiDataSettingsRouteImport } from './routes/api/data.settings'
@@ -87,6 +88,11 @@ const AdminKuliahRoute = AdminKuliahRouteImport.update({
 const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
   id: '/announcements',
   path: '/announcements',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAccountRoute = AdminAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => AdminRoute,
 } as any)
 const ApiUploadsSplatRoute = ApiUploadsSplatRouteImport.update({
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/admin/account': typeof AdminAccountRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/kuliah': typeof AdminKuliahRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
@@ -255,6 +262,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/admin/account': typeof AdminAccountRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/kuliah': typeof AdminKuliahRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
@@ -292,6 +300,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/admin/account': typeof AdminAccountRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/kuliah': typeof AdminKuliahRoute
   '/admin/slideshow': typeof AdminSlideshowRoute
@@ -330,6 +339,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/login'
+    | '/admin/account'
     | '/admin/announcements'
     | '/admin/kuliah'
     | '/admin/slideshow'
@@ -365,6 +375,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/admin/account'
     | '/admin/announcements'
     | '/admin/kuliah'
     | '/admin/slideshow'
@@ -401,6 +412,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/login'
+    | '/admin/account'
     | '/admin/announcements'
     | '/admin/kuliah'
     | '/admin/slideshow'
@@ -529,6 +541,13 @@ declare module '@tanstack/react-router' {
       path: '/announcements'
       fullPath: '/admin/announcements'
       preLoaderRoute: typeof AdminAnnouncementsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/account': {
+      id: '/admin/account'
+      path: '/account'
+      fullPath: '/admin/account'
+      preLoaderRoute: typeof AdminAccountRouteImport
       parentRoute: typeof AdminRoute
     }
     '/api/uploads/$': {
@@ -710,6 +729,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAccountRoute: typeof AdminAccountRoute
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminKuliahRoute: typeof AdminKuliahRoute
   AdminSlideshowRoute: typeof AdminSlideshowRoute
@@ -718,6 +738,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAccountRoute: AdminAccountRoute,
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminKuliahRoute: AdminKuliahRoute,
   AdminSlideshowRoute: AdminSlideshowRoute,
